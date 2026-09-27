@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Rolling Ball 3D</title>
+
+<style>
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #87ceeb;
+    font-family: Arial, sans-serif;
+}
+
+#game {
+    width: 100%;
+    height: 100%;
+}
+
+#ui {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    color: white;
+    text-align: center;
+    pointer-events: none;
+}
+
+#level {
+    font-size: 25px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px black;
+}
+
+#score {
+    font-size: 20px;
+    margin-top: 5px;
+    text-shadow: 2px 2px 4px black;
+}
+
+#controls {
+    position: fixed;
+    bottom: 35px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 35px;
+    box-sizing: border-box;
+    z-index: 20;
+}
+
+.control {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: rgba(0,0,0,0.45);
+    color: white;
+    font-size: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.control:active {
+    background: rgba(0,255,150,0.7);
+}
+
+#gameover {
+    position: fixed;
+    display: none;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    z-index: 30;
+    color: white;
+    text-align: center;
+}
+
+#gameover h1 {
+    margin-top: 35vh;
+    font-size: 45px;
+    color: #ff4444;
+}
+
+#restart {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 18px 35px;
+    background: #00cc66;
+    border-radius: 15px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="game"></div>
+
+<div id="ui">
+
+    <div id="level">
+        LEVEL 1
+    </div>
+
+    <div id="score">
+        BALL: 0
+    </div>
+
+</div>
+
+
+<div id="controls">
+
+    <div
+        class="control"
+        id="left">
+        ◀
+    </div>
+
+    <div
+        class="control"
+        id="right">
+        ▶
+    </div>
+
+</div>
+
+
+<div id="gameover">
+
+    <h1>GAME OVER</h1>
+
+    <div id="finalScore">
+        BALL: 0
+    </div>
+
+    <div id="restart">
+        QAYTA O'YNASH
+    </div>
+
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+
+/* =========================
+   SAHNA
+========================= */
+
+const scene = new THREE.Scene();
+
+scene.background =
+    new THREE.Color(0x87ceeb);
+
+
+/* =========================
+   KAMERA
+========================= */
+
+const camera =
+    new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+
+camera.position.set(
+    0,
+    6,
+    10
+);
+
+
+/* =========================
+   RENDERER
+========================= */
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true
+    });
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 2)
+);
+
+document
+    .getElementById("game")
+    .appendChild(renderer.domElement);
+
+
+/* =========================
+   YORUG'LIK
+========================= */
+
+const ambient =
+    new THREE.AmbientLight(
+        0xffffff,
+        0.7
+    );
+
+scene.add(ambient);
+
+
+const sun =
+    new THREE.DirectionalLight(
+        0xffffff,
+        1
+    );
+
+sun.position.set(
+    5,
+    10,
+    5
+);
+
+scene.add(sun);
+
+
+/* =========================
+   TRASSA
+========================= */
+
+const roadGeometry =
+    new THREE.BoxGeometry(
+        10,
+        0.5,
+        160
+    );
+
+const roadMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0xc8a46b
+    });
+
+const road =
+    new THREE.Mesh(
+        roadGeometry,
+        roadMaterial
+    );
+
+road.position.y = -0.5;
+
+scene.add(road);
+
+
+/* =========================
+   YO'L CHEGARALARI
+========================= */
+
+const railMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x333333
+    });
+
+
+function createRail(x) {
+
+    const geometry =
+        new THREE.BoxGeometry(
+            0.4,
+            0.8,
+            160
+        );
+
+    const rail =
+        new THREE.Mesh(
+            geometry,
+            railMaterial
+        );
+
+    rail.position.set(
+        x,
+        0,
+        0
+    );
+
+    scene.add(rail);
+}
+
+
+createRail(-5.2);
+createRail(5.2);
+
+
+/* =========================
+   SHAR
+========================= */
+
+const ballGeometry =
+    new THREE.SphereGeometry(
+        0.9,
+        32,
+        32
+    );
+
+const ballMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x00eaff,
+        metalness: 0.5,
+        roughness: 0.25
+    });
+
+const ball =
+    new THREE.Mesh(
+        ballGeometry,
+        ballMaterial
+    );
+
+ball.position.set(
+    0,
+    0.7,
+    6
+);
+
+scene.add(ball);
+
+
+/* =========================
+   TO'SIQLAR
+========================= */
+
+let obstacles = [];
+
+
+function createObstacle(x, z) {
+
+    const geometry =
+        new THREE.BoxGeometry(
+            2,
+            1.5,
+            1.5
+        );
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0xff3333
+        });
+
+    const obstacle =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+    obstacle.position.set(
+        x,
+        0.5,
+        z
+    );
+
+    scene.add(obstacle);
+
+    obstacles.push(obstacle);
+}
+
+
+/* To'siqlar */
+
+createObstacle(-2.5, -10);
+createObstacle(2.5, -25);
+createObstacle(0, -40);
+createObstacle(-2.5, -55);
+createObstacle(2.5, -70);
+createObstacle(0, -85);
+createObstacle(-2.5, -100);
+createObstacle(2.5, -115);
+
+
+/* =========================
+   TEZLIK ZONALARI
+========================= */
+
+let boosts = [];
+
+
+function createBoost(x, z) {
+
+    const geometry =
+        new THREE.BoxGeometry(
+            2.5,
+            0.1,
+            3
+        );
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0x00ffff,
+            emissive: 0x004444
+        });
+
+    const boost =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+    boost.position.set(
+        x,
+        0.1,
+        z
+    );
+
+    scene.add(boost);
+
+    boosts.push(boost);
+}
+
+
+createBoost(0, -18);
+createBoost(-2, -48);
+createBoost(2, -78);
+createBoost(0, -108);
+
+
+/* =========================
+   BOSHQARUV
+========================= */
+
+let leftPressed = false;
+let rightPressed = false;
+
+
+/* Chap */
+
+const leftButton =
+    document.getElementById("left");
+
+leftButton.addEventListener(
+    "touchstart",
+    function(e) {
+
+        e.preventDefault();
+        leftPressed = true;
+
+    }
+);
+
+
+leftButton.addEventListener(
+    "touchend",
+    function(e) {
+
+        e.preventDefault();
+        leftPressed = false;
+
+    }
+);
+
+
+/* O'ng */
+
+const rightButton =
+    document.getElementById("right");
+
+rightButton.addEventListener(
+    "touchstart",
+    function(e) {
+
+        e.preventDefault();
+        rightPressed = true;
+
+    }
+);
+
+
+rightButton.addEventListener(
+    "touchend",
+    function(e) {
+
+        e.preventDefault();
+        rightPressed = false;
+
+    }
+);
+
+
+/* Kompyuter uchun */
+
+document.addEventListener(
+    "keydown",
+    function(e) {
+
+        if (e.key === "ArrowLeft")
+            leftPressed = true;
+
+        if (e.key === "ArrowRight")
+            rightPressed = true;
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(e) {
+
+        if (e.key === "ArrowLeft")
+            leftPressed = false;
+
+        if (e.key === "ArrowRight")
+            rightPressed = false;
+
+    }
+);
+
+
+/* =========================
+   O'YIN
+========================= */
+
+let speed = 0.12;
+
+let score = 0;
+
+let gameOver = false;
+
+let level = 1;
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function endGame() {
+
+    gameOver = true;
+
+    document
+        .getElementById("finalScore")
+        .innerText =
+        "BALL: " + score;
+
+    document
+        .getElementById("gameover")
+        .style.display = "block";
+
+}
+
+
+/* =========================
+   QAYTA BOSHLASH
+========================= */
+
+document
+    .getElementById("restart")
+    .addEventListener(
+        "click",
+        function() {
+
+            location.reload();
+
+        }
+    );
+
+
+/* =========================
+   ANIMATION
+========================= */
+
+function animate() {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    if (!gameOver) {
+
+        /* Chap */
+
+        if (leftPressed) {
+
+            ball.position.x -= 0.12;
+
+        }
+
+
+        /* O'ng */
+
+        if (rightPressed) {
+
+            ball.position.x += 0.12;
+
+        }
+
+
+        /* Chegaradan chiqmasin */
+
+        if (ball.position.x < -4)
+            ball.position.x = -4;
+
+        if (ball.position.x > 4)
+            ball.position.x = 4;
+
+
+        /* Oldinga yurish */
+
+        ball.position.z -= speed;
+
+
+        /* Shar aylanishi */
+
+        ball.rotation.x -= speed;
+
+
+        /* Ball */
+
+        score =
+            Math.floor(
+                Math.abs(ball.position.z)
+            );
+
+        document
+            .getElementById("score")
+            .innerText =
+            "BALL: " + score;
+
+
+        /* =====================
+           TO'QNASHUV
+        ===================== */
+
+        for (
+            let obstacle of obstacles
+        ) {
+
+            const distance =
+                ball.position.distanceTo(
+                    obstacle.position
+                );
+
+            if (distance < 1.8) {
+
+                endGame();
+
+            }
+
+        }
+
+
+        /* =====================
+           TEZLIK
+        ===================== */
+
+        for (
+            let boost of boosts
+        ) {
+
+            const distance =
+                ball.position.distanceTo(
+                    boost.position
+                );
+
+            if (distance < 2) {
+
+                speed = 0.25;
+
+                setTimeout(
+                    function() {
+
+                        speed = 0.12;
+
+                    },
+                    1500
+                );
+
+            }
+
+        }
+
+
+        /* =====================
+           LEVEL
+        ===================== */
+
+        if (score > 100)
+            level = 2;
+
+        if (score > 200)
+            level = 3;
+
+        if (score > 300)
+            level = 4;
+
+
+        document
+            .getElementById("level")
+            .innerText =
+            "LEVEL " + level;
+
+
+        /* =====================
+           KAMERA
+        ===================== */
+
+        camera.position.x =
+            ball.position.x * 0.4;
+
+        camera.position.z =
+            ball.position.z + 10;
+
+        camera.lookAt(
+            ball.position.x,
+            0,
+            ball.position.z - 8
+        );
+
+    }
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+
+/* =========================
+   EKRAN O'ZGARISHI
+========================= */
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
+
+
+/* BOSHLASH */
+
+animate();
+
+</script>
+
+</body>
+</html>
