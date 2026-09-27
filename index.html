@@ -2,133 +2,277 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ball Game</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Ball Runner</title>
 
 <style>
 * {
     box-sizing: border-box;
-    touch-action: manipulation;
+    margin: 0;
+    padding: 0;
+    touch-action: none;
 }
 
 body {
-    margin: 0;
     overflow: hidden;
     background: #111;
     font-family: Arial, sans-serif;
 }
 
 #game {
+    position: relative;
     width: 100vw;
     height: 100vh;
-    position: relative;
     overflow: hidden;
-    background: linear-gradient(#78cbea, #dff6ff);
+    background:
+        linear-gradient(
+            90deg,
+            #222 0%,
+            #333 12%,
+            #111 12%,
+            #111 88%,
+            #333 88%,
+            #222 100%
+        );
 }
 
-/* Yo‘l */
+/* ROAD */
 #road {
     position: absolute;
+    left: 14%;
     width: 72%;
     height: 100%;
-    left: 14%;
-    background: #d2ad72;
-    border-left: 7px solid #9b7746;
-    border-right: 7px solid #9b7746;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #292929 0px,
+            #292929 80px,
+            #333 80px,
+            #333 160px
+        );
+    border-left: 5px solid #eee;
+    border-right: 5px solid #eee;
 }
 
-/* Yuqoridagi ma'lumot */
-#info {
+/* ROAD CENTER LINES */
+.line {
     position: absolute;
-    top: 15px;
-    width: 100%;
-    text-align: center;
-    z-index: 10;
-    color: white;
-    font-size: 25px;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px #333;
+    top: 0;
+    width: 7px;
+    height: 70px;
+    background: white;
+    opacity: 0.8;
 }
 
+#line1 {
+    left: 33%;
+}
+
+#line2 {
+    left: 66%;
+}
+
+/* SCORE */
+#scoreBox {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 20;
+
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+
+    background: rgba(0,0,0,0.55);
+    padding: 10px 16px;
+    border-radius: 12px;
+}
+
+/* LEVEL */
+#levelBox {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+
+    background: rgba(0,0,0,0.55);
+    padding: 10px 16px;
+    border-radius: 12px;
+}
+
+/* BALL */
 #ball {
     position: absolute;
     width: 65px;
     height: 65px;
+
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 25%, white, #00c8d8 18%, #008899 55%, #004d55);
-    box-shadow: 0 8px 12px rgba(0,0,0,.4);
-    z-index: 5;
+
+    background:
+        radial-gradient(
+            circle at 30% 25%,
+            white 0%,
+            #7df9ff 12%,
+            #00b7ff 40%,
+            #0066ff 75%,
+            #001d70 100%
+        );
+
+    box-shadow:
+        0 0 15px #00bfff,
+        0 0 30px rgba(0,191,255,0.5);
+
+    z-index: 10;
+
+    transition: transform 0.03s linear;
 }
 
-/* To'siq */
+/* OBSTACLE */
 .obstacle {
     position: absolute;
-    width: 90px;
-    height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(#e84b3c, #9d1710);
-    border: 4px solid white;
-    box-shadow: 0 5px 8px rgba(0,0,0,.4);
-    z-index: 4;
+
+    width: 75px;
+    height: 75px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff4444,
+            #a50000
+        );
+
+    border: 4px solid #ffaaaa;
+    border-radius: 12px;
+
+    box-shadow:
+        0 0 15px rgba(255,0,0,0.8);
+
+    z-index: 8;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
 }
 
-.obstacle::after {
-    content: "⚠";
+/* BUTTONS */
+.controls {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: yellow;
-    font-size: 22px;
+
+    bottom: 25px;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+
+    padding: 0 25px;
+
+    z-index: 30;
 }
 
-/* Tugmalar */
-.control {
-    position: absolute;
-    bottom: 40px;
-    width: 125px;
-    height: 125px;
+.controlButton {
+    width: 120px;
+    height: 120px;
+
     border-radius: 50%;
-    border: 5px solid white;
-    background: rgba(40,70,85,.75);
+
+    border: 4px solid rgba(255,255,255,0.7);
+
+    background:
+        radial-gradient(
+            circle,
+            #555,
+            #222
+        );
+
     color: white;
+
     font-size: 55px;
-    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,0.6);
+
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-#left {
-    left: 8%;
+.controlButton:active {
+    transform: scale(0.92);
+
+    background:
+        radial-gradient(
+            circle,
+            #777,
+            #333
+        );
 }
 
-#right {
-    right: 8%;
-}
-
-.control:active {
-    transform: scale(.92);
-    background: rgba(20,40,50,.95);
-}
-
-#gameover {
+/* GAME OVER */
+#gameOver {
     display: none;
+
     position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,.75);
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 100;
+
+    width: 85%;
+    max-width: 400px;
+
+    background: rgba(0,0,0,0.92);
+
     color: white;
-    z-index: 50;
+
+    padding: 35px;
+
+    border-radius: 25px;
+
     text-align: center;
-    padding-top: 35vh;
+
+    box-shadow: 0 0 30px rgba(255,255,255,0.2);
 }
 
-#gameover h1 {
-    font-size: 42px;
+#gameOver h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+#finalScore {
+    font-size: 25px;
+    margin-bottom: 25px;
 }
 
 #restart {
-    padding: 15px 30px;
-    font-size: 20px;
     border: none;
-    border-radius: 10px;
+
+    padding: 15px 35px;
+
+    border-radius: 15px;
+
+    background: #00aaff;
+
+    color: white;
+
+    font-size: 20px;
+    font-weight: bold;
 }
 </style>
 </head>
@@ -137,23 +281,45 @@ body {
 
 <div id="game">
 
-    <div id="road"></div>
+    <div id="road">
+        <div class="line" id="line1"></div>
+        <div class="line" id="line2"></div>
+    </div>
 
-    <div id="info">
+    <div id="scoreBox">
+        SCORE: <span id="score">0</span>
+    </div>
+
+    <div id="levelBox">
         LEVEL: <span id="level">1</span>
-        &nbsp;&nbsp;
-        BALL: <span id="score">0</span>
     </div>
 
     <div id="ball"></div>
 
-    <button class="control" id="left">◀</button>
-    <button class="control" id="right">▶</button>
+    <div class="controls">
 
-    <div id="gameover">
+        <div class="controlButton" id="leftButton">
+            ◀
+        </div>
+
+        <div class="controlButton" id="rightButton">
+            ▶
+        </div>
+
+    </div>
+
+    <div id="gameOver">
+
         <h1>GAME OVER</h1>
-        <p>Ball: <span id="finalScore">0</span></p>
-        <button id="restart">QAYTA O‘YNASH</button>
+
+        <div id="finalScore">
+            Score: 0
+        </div>
+
+        <button id="restart">
+            PLAY AGAIN
+        </button>
+
     </div>
 
 </div>
@@ -161,138 +327,66 @@ body {
 <script>
 
 const game = document.getElementById("game");
+const road = document.getElementById("road");
 const ball = document.getElementById("ball");
+
 const scoreText = document.getElementById("score");
 const levelText = document.getElementById("level");
 
-const leftButton = document.getElementById("left");
-const rightButton = document.getElementById("right");
+const leftButton = document.getElementById("leftButton");
+const rightButton = document.getElementById("rightButton");
+
+const gameOverScreen = document.getElementById("gameOver");
+const finalScore = document.getElementById("finalScore");
+const restartButton = document.getElementById("restart");
+
+
+/* GAME VARIABLES */
+
+let gameRunning = true;
+
+let score = 0;
+
+let level = 1;
+
+let speed = 4;
 
 let ballX = 50;
-let score = 0;
-let level = 1;
-let speed = 3;
-let gameRunning = true;
 
 let obstacles = [];
 
-/* Sharni joylashtirish */
+let obstacleTimer;
+
+
+/* BALL POSITION */
+
 function updateBall() {
 
-    const road = document.getElementById("road");
-    const roadLeft = road.offsetLeft;
-    const roadWidth = road.offsetWidth;
+    ballX = Math.max(0, Math.min(100, ballX));
 
-    const x = roadLeft + (roadWidth - ball.offsetWidth) * ballX / 100;
+    ball.style.left =
+        `calc(${14 + (ballX * 0.72)}% - 32px)`;
 
-    ball.style.left = x + "px";
-    ball.style.bottom = "190px";
+    ball.style.bottom = "145px";
 }
 
-/* To'siq yaratish */
-function createObstacle() {
 
-    const obstacle = document.createElement("div");
+/* INITIAL BALL */
 
-    obstacle.className = "obstacle";
+updateBall();
 
-    const road = document.getElementById("road");
 
-    const minX = road.offsetLeft + 10;
-    const maxX = road.offsetLeft + road.offsetWidth - 100;
+/* MOVEMENT */
 
-    const x = minX + Math.random() * (maxX - minX);
+let moveLeftPressed = false;
+let moveRightPressed = false;
 
-    obstacle.style.left = x + "px";
-    obstacle.style.top = "-50px";
 
-    game.appendChild(obstacle);
-
-    obstacles.push({
-        element: obstacle,
-        x: x,
-        y: -50,
-        passed: false
-    });
-}
-
-/* To'siqlarni harakatlantirish */
-function moveObstacles() {
-
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-
-        let o = obstacles[i];
-
-        o.y += speed;
-        o.element.style.top = o.y + "px";
-
-        /* To'siq o'tib ketganda */
-        if (!o.passed && o.y > window.innerHeight - 250) {
-
-            o.passed = true;
-            score++;
-
-            scoreText.textContent = score;
-
-            if (score % 10 === 0) {
-                level++;
-                speed += 0.7;
-                levelText.textContent = level;
-            }
-        }
-
-        /* Ekrandan chiqsa */
-        if (o.y > window.innerHeight + 100) {
-
-            o.element.remove();
-            obstacles.splice(i, 1);
-        }
-
-        /* To'qnashuv */
-        checkCollision(o);
-    }
-}
-
-/* To'qnashuvni tekshirish */
-function checkCollision(o) {
-
-    const b = ball.getBoundingClientRect();
-    const r = o.element.getBoundingClientRect();
-
-    if (
-        b.left < r.right &&
-        b.right > r.left &&
-        b.top < r.bottom &&
-        b.bottom > r.top
-    ) {
-        endGame();
-    }
-}
-
-/* O'yinni tugatish */
-function endGame() {
-
-    if (!gameRunning) return;
-
-    gameRunning = false;
-
-    document.getElementById("finalScore").textContent = score;
-    document.getElementById("gameover").style.display = "block";
-}
-
-/* Qayta boshlash */
-document.getElementById("restart").onclick = function() {
-
-    location.reload();
-
-};
-
-/* Chap */
 function moveLeft() {
 
     if (!gameRunning) return;
 
-    ballX -= 7;
+    ballX -= 1.5;
 
     if (ballX < 0)
         ballX = 0;
@@ -300,12 +394,12 @@ function moveLeft() {
     updateBall();
 }
 
-/* O'ng */
+
 function moveRight() {
 
     if (!gameRunning) return;
 
-    ballX += 7;
+    ballX += 1.5;
 
     if (ballX > 100)
         ballX = 100;
@@ -313,56 +407,314 @@ function moveRight() {
     updateBall();
 }
 
-/* Telefon tugmalari */
-leftButton.addEventListener("touchstart", function(e) {
-    e.preventDefault();
-    moveLeft();
-});
 
-rightButton.addEventListener("touchstart", function(e) {
-    e.preventDefault();
-    moveRight();
-});
+/* TOUCH CONTROLS */
 
-/* Sichqoncha uchun */
-leftButton.onclick = moveLeft;
-rightButton.onclick = moveRight;
+leftButton.addEventListener(
+    "touchstart",
+    function(e) {
 
-/* Klaviatura */
-document.addEventListener("keydown", function(e) {
+        e.preventDefault();
 
-    if (e.key === "ArrowLeft")
+        moveLeftPressed = true;
+    },
+    { passive:false }
+);
+
+
+leftButton.addEventListener(
+    "touchend",
+    function(e) {
+
+        e.preventDefault();
+
+        moveLeftPressed = false;
+    },
+    { passive:false }
+);
+
+
+rightButton.addEventListener(
+    "touchstart",
+    function(e) {
+
+        e.preventDefault();
+
+        moveRightPressed = true;
+    },
+    { passive:false }
+);
+
+
+rightButton.addEventListener(
+    "touchend",
+    function(e) {
+
+        e.preventDefault();
+
+        moveRightPressed = false;
+    },
+    { passive:false }
+);
+
+
+/* MOUSE CONTROLS */
+
+leftButton.addEventListener(
+    "mousedown",
+    function() {
+
+        moveLeftPressed = true;
+    }
+);
+
+
+leftButton.addEventListener(
+    "mouseup",
+    function() {
+
+        moveLeftPressed = false;
+    }
+);
+
+
+rightButton.addEventListener(
+    "mousedown",
+    function() {
+
+        moveRightPressed = true;
+    }
+);
+
+
+rightButton.addEventListener(
+    "mouseup",
+    function() {
+
+        moveRightPressed = false;
+    }
+);
+
+
+/* CONTINUOUS MOVEMENT */
+
+function controlLoop() {
+
+    if (moveLeftPressed)
         moveLeft();
 
-    if (e.key === "ArrowRight")
+    if (moveRightPressed)
         moveRight();
 
-});
+    requestAnimationFrame(controlLoop);
+}
 
-/* Harakat */
+controlLoop();
+
+
+/* CREATE OBSTACLE */
+
+function createObstacle() {
+
+    if (!gameRunning)
+        return;
+
+    const obstacle = document.createElement("div");
+
+    obstacle.className = "obstacle";
+
+    obstacle.innerHTML = "⚠";
+
+    const randomX =
+        Math.random() * 90 + 5;
+
+    obstacle.style.left =
+        `calc(${14 + (randomX * 0.72)}% - 37px)`;
+
+    obstacle.style.top = "-100px";
+
+    game.appendChild(obstacle);
+
+    obstacles.push({
+        element: obstacle,
+        x: randomX,
+        y: -100
+    });
+}
+
+
+/* COLLISION */
+
+function checkCollision(a, b) {
+
+    const r1 = a.getBoundingClientRect();
+    const r2 = b.getBoundingClientRect();
+
+    return !(
+        r1.right < r2.left ||
+        r1.left > r2.right ||
+        r1.bottom < r2.top ||
+        r1.top > r2.bottom
+    );
+}
+
+
+/* GAME LOOP */
+
 function gameLoop() {
 
-    if (gameRunning) {
-        moveObstacles();
+    if (!gameRunning) {
+
+        requestAnimationFrame(gameLoop);
+
+        return;
     }
+
+
+    for (
+        let i = obstacles.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const obj = obstacles[i];
+
+        obj.y += speed;
+
+        obj.element.style.top =
+            obj.y + "px";
+
+
+        /* COLLISION */
+
+        if (
+            checkCollision(
+                ball,
+                obj.element
+            )
+        ) {
+
+            endGame();
+
+            return;
+        }
+
+
+        /* PASSED */
+
+        if (
+            obj.y >
+            window.innerHeight
+        ) {
+
+            obj.element.remove();
+
+            obstacles.splice(i, 1);
+
+            score++;
+
+            scoreText.textContent =
+                score;
+
+
+            /* LEVEL UP */
+
+            if (
+                score % 10 === 0
+            ) {
+
+                level++;
+
+                levelText.textContent =
+                    level;
+
+                speed += 0.7;
+            }
+        }
+    }
+
 
     requestAnimationFrame(gameLoop);
 }
 
-/* Har 1 sekundda yangi to'siq */
-setInterval(function() {
 
-    if (gameRunning) {
-        createObstacle();
-    }
-
-}, 1000);
-
-/* Boshlash */
-window.addEventListener("resize", updateBall);
-
-updateBall();
 gameLoop();
+
+
+/* OBSTACLE GENERATOR */
+
+function startObstacleGenerator() {
+
+    obstacleTimer =
+        setInterval(
+            createObstacle,
+            900
+        );
+}
+
+
+startObstacleGenerator();
+
+
+/* GAME OVER */
+
+function endGame() {
+
+    gameRunning = false;
+
+    clearInterval(obstacleTimer);
+
+    finalScore.textContent =
+        "Score: " + score;
+
+    gameOverScreen.style.display =
+        "block";
+}
+
+
+/* RESTART */
+
+restartButton.addEventListener(
+    "click",
+    function() {
+
+        /* REMOVE OLD OBSTACLES */
+
+        obstacles.forEach(
+            obj => obj.element.remove()
+        );
+
+        obstacles = [];
+
+
+        /* RESET */
+
+        score = 0;
+
+        level = 1;
+
+        speed = 4;
+
+        ballX = 50;
+
+        scoreText.textContent = "0";
+
+        levelText.textContent = "1";
+
+
+        updateBall();
+
+
+        gameOverScreen.style.display =
+            "none";
+
+
+        gameRunning = true;
+
+
+        startObstacleGenerator();
+    }
+);
 
 </script>
 
