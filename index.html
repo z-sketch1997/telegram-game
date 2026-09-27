@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
 <title>Ball Runner</title>
 
 <style>
+
+/* =========================
+   RESET
+========================= */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -15,35 +25,61 @@
     touch-action: none;
 }
 
+html,
 body {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+}
+
+body {
     background: #111;
     font-family: Arial, sans-serif;
 }
 
+
+/* =========================
+   GAME
+========================= */
+
 #game {
+
     position: relative;
+
     width: 100vw;
     height: 100vh;
+
     overflow: hidden;
+
     background:
         linear-gradient(
             90deg,
             #222 0%,
-            #333 12%,
-            #111 12%,
-            #111 88%,
-            #333 88%,
+            #333 14%,
+            #111 14%,
+            #111 86%,
+            #333 86%,
             #222 100%
         );
 }
 
-/* ROAD */
+
+/* =========================
+   ROAD
+========================= */
+
 #road {
+
     position: absolute;
+
     left: 14%;
+    top: 0;
+
     width: 72%;
     height: 100%;
+
+    overflow: hidden;
+
     background:
         repeating-linear-gradient(
             to bottom,
@@ -52,63 +88,112 @@ body {
             #333 80px,
             #333 160px
         );
-    border-left: 5px solid #eee;
-    border-right: 5px solid #eee;
+
+    border-left: 5px solid white;
+    border-right: 5px solid white;
 }
 
-/* ROAD CENTER LINES */
-.line {
+
+/* =========================
+   ROAD LINES
+========================= */
+
+.road-line {
+
     position: absolute;
-    top: 0;
-    width: 7px;
+
+    width: 6px;
     height: 70px;
+
     background: white;
-    opacity: 0.8;
+
+    opacity: 0.75;
+
+    animation:
+        roadAnimation 0.7s
+        linear infinite;
 }
 
-#line1 {
+.road-line.one {
     left: 33%;
 }
 
-#line2 {
+.road-line.two {
     left: 66%;
 }
 
-/* SCORE */
+@keyframes roadAnimation {
+
+    from {
+        transform: translateY(-120px);
+    }
+
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+
+/* =========================
+   SCORE
+========================= */
+
 #scoreBox {
+
     position: absolute;
+
     top: 20px;
     left: 20px;
-    z-index: 20;
+
+    z-index: 50;
+
+    padding: 10px 16px;
 
     color: white;
+
     font-size: 22px;
     font-weight: bold;
 
-    background: rgba(0,0,0,0.55);
-    padding: 10px 16px;
+    background: rgba(0,0,0,0.65);
+
     border-radius: 12px;
 }
 
-/* LEVEL */
+
+/* =========================
+   LEVEL
+========================= */
+
 #levelBox {
+
     position: absolute;
+
     top: 20px;
     right: 20px;
-    z-index: 20;
+
+    z-index: 50;
+
+    padding: 10px 16px;
 
     color: white;
+
     font-size: 18px;
     font-weight: bold;
 
-    background: rgba(0,0,0,0.55);
-    padding: 10px 16px;
+    background: rgba(0,0,0,0.65);
+
     border-radius: 12px;
 }
 
-/* BALL */
+
+/* =========================
+   BALL
+========================= */
+
 #ball {
+
     position: absolute;
+
     width: 65px;
     height: 65px;
 
@@ -118,7 +203,7 @@ body {
         radial-gradient(
             circle at 30% 25%,
             white 0%,
-            #7df9ff 12%,
+            #7df9ff 10%,
             #00b7ff 40%,
             #0066ff 75%,
             #001d70 100%
@@ -126,15 +211,18 @@ body {
 
     box-shadow:
         0 0 15px #00bfff,
-        0 0 30px rgba(0,191,255,0.5);
+        0 0 30px rgba(0,191,255,0.6);
 
-    z-index: 10;
-
-    transition: transform 0.03s linear;
+    z-index: 20;
 }
 
-/* OBSTACLE */
+
+/* =========================
+   OBSTACLE
+========================= */
+
 .obstacle {
+
     position: absolute;
 
     width: 75px;
@@ -143,50 +231,62 @@ body {
     background:
         linear-gradient(
             135deg,
-            #ff4444,
-            #a50000
+            #ff3333,
+            #990000
         );
 
     border: 4px solid #ffaaaa;
+
     border-radius: 12px;
 
     box-shadow:
-        0 0 15px rgba(255,0,0,0.8);
+        0 0 20px rgba(255,0,0,0.8);
 
-    z-index: 8;
+    z-index: 15;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     color: white;
-    font-size: 35px;
+
+    font-size: 38px;
     font-weight: bold;
 }
 
-/* BUTTONS */
+
+/* =========================
+   CONTROL BUTTONS
+========================= */
+
 .controls {
+
     position: absolute;
 
-    bottom: 25px;
     left: 0;
-    width: 100%;
+    bottom: 25px;
 
-    display: flex;
-    justify-content: space-between;
+    width: 100%;
 
     padding: 0 25px;
 
-    z-index: 30;
+    display: flex;
+
+    justify-content: space-between;
+
+    z-index: 60;
 }
 
-.controlButton {
+
+.control {
+
     width: 120px;
     height: 120px;
 
     border-radius: 50%;
 
-    border: 4px solid rgba(255,255,255,0.7);
+    border: 4px solid rgba(255,255,255,0.8);
 
     background:
         radial-gradient(
@@ -200,29 +300,30 @@ body {
     font-size: 55px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
-    box-shadow:
-        0 5px 20px rgba(0,0,0,0.6);
-
     user-select: none;
     -webkit-user-select: none;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,0.6);
 }
 
-.controlButton:active {
+
+.control:active {
+
     transform: scale(0.92);
-
-    background:
-        radial-gradient(
-            circle,
-            #777,
-            #333
-        );
 }
 
-/* GAME OVER */
+
+/* =========================
+   GAME OVER
+========================= */
+
 #gameOver {
+
     display: none;
 
     position: absolute;
@@ -232,39 +333,44 @@ body {
 
     transform: translate(-50%, -50%);
 
-    z-index: 100;
-
     width: 85%;
     max-width: 400px;
 
-    background: rgba(0,0,0,0.92);
+    padding: 35px;
+
+    z-index: 100;
+
+    background: rgba(0,0,0,0.95);
 
     color: white;
 
-    padding: 35px;
-
-    border-radius: 25px;
-
     text-align: center;
 
-    box-shadow: 0 0 30px rgba(255,255,255,0.2);
+    border-radius: 25px;
 }
+
 
 #gameOver h1 {
-    font-size: 40px;
+
     margin-bottom: 15px;
+
+    font-size: 40px;
 }
+
 
 #finalScore {
-    font-size: 25px;
+
     margin-bottom: 25px;
+
+    font-size: 25px;
 }
 
+
 #restart {
-    border: none;
 
     padding: 15px 35px;
 
+    border: none;
     border-radius: 15px;
 
     background: #00aaff;
@@ -274,43 +380,85 @@ body {
     font-size: 20px;
     font-weight: bold;
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div id="game">
 
+
+    <!-- ROAD -->
+
     <div id="road">
-        <div class="line" id="line1"></div>
-        <div class="line" id="line2"></div>
+
+        <div class="road-line one"></div>
+
+        <div class="road-line two"></div>
+
     </div>
+
+
+    <!-- SCORE -->
 
     <div id="scoreBox">
-        SCORE: <span id="score">0</span>
+
+        SCORE:
+        <span id="score">0</span>
+
     </div>
 
+
+    <!-- LEVEL -->
+
     <div id="levelBox">
-        LEVEL: <span id="level">1</span>
+
+        LEVEL:
+        <span id="level">1</span>
+
     </div>
+
+
+    <!-- BALL -->
 
     <div id="ball"></div>
 
+
+    <!-- CONTROLS -->
+
     <div class="controls">
 
-        <div class="controlButton" id="leftButton">
+        <div
+            class="control"
+            id="leftButton">
+
             ◀
+
         </div>
 
-        <div class="controlButton" id="rightButton">
+
+        <div
+            class="control"
+            id="rightButton">
+
             ▶
+
         </div>
 
     </div>
 
+
+    <!-- GAME OVER -->
+
     <div id="gameOver">
 
-        <h1>GAME OVER</h1>
+        <h1>
+            GAME OVER
+        </h1>
 
         <div id="finalScore">
             Score: 0
@@ -322,28 +470,52 @@ body {
 
     </div>
 
+
 </div>
+
 
 <script>
 
-const game = document.getElementById("game");
-const road = document.getElementById("road");
-const ball = document.getElementById("ball");
+/* =====================================================
+   ELEMENTLAR
+===================================================== */
 
-const scoreText = document.getElementById("score");
-const levelText = document.getElementById("level");
+const game =
+    document.getElementById("game");
 
-const leftButton = document.getElementById("leftButton");
-const rightButton = document.getElementById("rightButton");
+const road =
+    document.getElementById("road");
 
-const gameOverScreen = document.getElementById("gameOver");
-const finalScore = document.getElementById("finalScore");
-const restartButton = document.getElementById("restart");
+const ball =
+    document.getElementById("ball");
+
+const scoreElement =
+    document.getElementById("score");
+
+const levelElement =
+    document.getElementById("level");
+
+const leftButton =
+    document.getElementById("leftButton");
+
+const rightButton =
+    document.getElementById("rightButton");
+
+const gameOverScreen =
+    document.getElementById("gameOver");
+
+const finalScoreElement =
+    document.getElementById("finalScore");
+
+const restartButton =
+    document.getElementById("restart");
 
 
-/* GAME VARIABLES */
+/* =====================================================
+   O'YIN O'ZGARUVCHILARI
+===================================================== */
 
-let gameRunning = true;
+let gameRunning = false;
 
 let score = 0;
 
@@ -351,120 +523,188 @@ let level = 1;
 
 let speed = 4;
 
-let ballX = 50;
+let ballPosition = 50;
 
 let obstacles = [];
 
-let obstacleTimer;
+let obstacleTimer = null;
+
+let leftPressed = false;
+
+let rightPressed = false;
 
 
-/* BALL POSITION */
+/* =====================================================
+   BALL JOYLASHUVI
+===================================================== */
 
 function updateBall() {
 
-    ballX = Math.max(0, Math.min(100, ballX));
+    const roadWidth =
+        road.clientWidth;
+
+    const ballWidth =
+        ball.clientWidth;
+
+    const availableWidth =
+        roadWidth - ballWidth;
+
+    let x =
+        availableWidth *
+        (ballPosition / 100);
+
+
+    if (x < 0) {
+        x = 0;
+    }
+
+
+    if (x > availableWidth) {
+        x = availableWidth;
+    }
+
 
     ball.style.left =
-        `calc(${14 + (ballX * 0.72)}% - 32px)`;
+        (road.offsetLeft + x) + "px";
 
-    ball.style.bottom = "145px";
+
+    ball.style.top =
+        (window.innerHeight - 220) + "px";
 }
 
 
-/* INITIAL BALL */
-
-updateBall();
-
-
-/* MOVEMENT */
-
-let moveLeftPressed = false;
-let moveRightPressed = false;
-
+/* =====================================================
+   CHAPGA
+===================================================== */
 
 function moveLeft() {
 
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        return;
+    }
 
-    ballX -= 1.5;
 
-    if (ballX < 0)
-        ballX = 0;
+    ballPosition -= 1.5;
+
+
+    if (ballPosition < 0) {
+        ballPosition = 0;
+    }
+
 
     updateBall();
 }
 
+
+/* =====================================================
+   O'NGGA
+===================================================== */
 
 function moveRight() {
 
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        return;
+    }
 
-    ballX += 1.5;
 
-    if (ballX > 100)
-        ballX = 100;
+    ballPosition += 1.5;
+
+
+    if (ballPosition > 100) {
+        ballPosition = 100;
+    }
+
 
     updateBall();
 }
 
 
-/* TOUCH CONTROLS */
+/* =====================================================
+   TOUCH CONTROL
+===================================================== */
 
 leftButton.addEventListener(
     "touchstart",
-    function(e) {
+    function(event) {
 
-        e.preventDefault();
+        event.preventDefault();
 
-        moveLeftPressed = true;
+        leftPressed = true;
+
     },
-    { passive:false }
+    { passive: false }
 );
 
 
 leftButton.addEventListener(
     "touchend",
-    function(e) {
+    function(event) {
 
-        e.preventDefault();
+        event.preventDefault();
 
-        moveLeftPressed = false;
+        leftPressed = false;
+
     },
-    { passive:false }
+    { passive: false }
+);
+
+
+leftButton.addEventListener(
+    "touchcancel",
+    function() {
+
+        leftPressed = false;
+
+    }
 );
 
 
 rightButton.addEventListener(
     "touchstart",
-    function(e) {
+    function(event) {
 
-        e.preventDefault();
+        event.preventDefault();
 
-        moveRightPressed = true;
+        rightPressed = true;
+
     },
-    { passive:false }
+    { passive: false }
 );
 
 
 rightButton.addEventListener(
     "touchend",
-    function(e) {
+    function(event) {
 
-        e.preventDefault();
+        event.preventDefault();
 
-        moveRightPressed = false;
+        rightPressed = false;
+
     },
-    { passive:false }
+    { passive: false }
 );
 
 
-/* MOUSE CONTROLS */
+rightButton.addEventListener(
+    "touchcancel",
+    function() {
+
+        rightPressed = false;
+
+    }
+);
+
+
+/* =====================================================
+   MOUSE CONTROL
+===================================================== */
 
 leftButton.addEventListener(
     "mousedown",
     function() {
 
-        moveLeftPressed = true;
+        leftPressed = true;
+
     }
 );
 
@@ -473,7 +713,18 @@ leftButton.addEventListener(
     "mouseup",
     function() {
 
-        moveLeftPressed = false;
+        leftPressed = false;
+
+    }
+);
+
+
+leftButton.addEventListener(
+    "mouseleave",
+    function() {
+
+        leftPressed = false;
+
     }
 );
 
@@ -482,7 +733,8 @@ rightButton.addEventListener(
     "mousedown",
     function() {
 
-        moveRightPressed = true;
+        rightPressed = true;
+
     }
 );
 
@@ -491,82 +743,157 @@ rightButton.addEventListener(
     "mouseup",
     function() {
 
-        moveRightPressed = false;
+        rightPressed = false;
+
     }
 );
 
 
-/* CONTINUOUS MOVEMENT */
+rightButton.addEventListener(
+    "mouseleave",
+    function() {
+
+        rightPressed = false;
+
+    }
+);
+
+
+/* =====================================================
+   UZLUKSIZ BOSHQARUV
+===================================================== */
 
 function controlLoop() {
 
-    if (moveLeftPressed)
+    if (leftPressed) {
         moveLeft();
+    }
 
-    if (moveRightPressed)
+
+    if (rightPressed) {
         moveRight();
-
-    requestAnimationFrame(controlLoop);
-}
-
-controlLoop();
+    }
 
 
-/* CREATE OBSTACLE */
-
-function createObstacle() {
-
-    if (!gameRunning)
-        return;
-
-    const obstacle = document.createElement("div");
-
-    obstacle.className = "obstacle";
-
-    obstacle.innerHTML = "⚠";
-
-    const randomX =
-        Math.random() * 90 + 5;
-
-    obstacle.style.left =
-        `calc(${14 + (randomX * 0.72)}% - 37px)`;
-
-    obstacle.style.top = "-100px";
-
-    game.appendChild(obstacle);
-
-    obstacles.push({
-        element: obstacle,
-        x: randomX,
-        y: -100
-    });
-}
-
-
-/* COLLISION */
-
-function checkCollision(a, b) {
-
-    const r1 = a.getBoundingClientRect();
-    const r2 = b.getBoundingClientRect();
-
-    return !(
-        r1.right < r2.left ||
-        r1.left > r2.right ||
-        r1.bottom < r2.top ||
-        r1.top > r2.bottom
+    requestAnimationFrame(
+        controlLoop
     );
 }
 
 
-/* GAME LOOP */
+controlLoop();
 
-function gameLoop() {
+
+/* =====================================================
+   TO'SIQ YARATISH
+===================================================== */
+
+function createObstacle() {
 
     if (!gameRunning) {
+        return;
+    }
 
-        requestAnimationFrame(gameLoop);
 
+    const obstacle =
+        document.createElement("div");
+
+
+    obstacle.className =
+        "obstacle";
+
+
+    obstacle.textContent =
+        "⚠";
+
+
+    /*
+       TO'SIQNI YO'L ICHIGA
+       JOYLASHTIRAMIZ
+    */
+
+    const roadWidth =
+        road.clientWidth;
+
+    const obstacleWidth =
+        75;
+
+
+    const maximumX =
+        roadWidth -
+        obstacleWidth;
+
+
+    const randomX =
+        Math.random() *
+        maximumX;
+
+
+    /*
+       ABSOLUTE PIXEL
+       KOORDINATA
+    */
+
+    const obstacleX =
+        road.offsetLeft +
+        randomX;
+
+
+    obstacle.style.left =
+        obstacleX + "px";
+
+
+    obstacle.style.top =
+        "-90px";
+
+
+    game.appendChild(
+        obstacle
+    );
+
+
+    obstacles.push({
+
+        element: obstacle,
+
+        y: -90
+
+    });
+}
+
+
+/* =====================================================
+   TO'QNASHUVNI TEKSHIRISH
+===================================================== */
+
+function isCollision(
+    object1,
+    object2
+) {
+
+    const rect1 =
+        object1.getBoundingClientRect();
+
+    const rect2 =
+        object2.getBoundingClientRect();
+
+
+    return !(
+        rect1.right < rect2.left ||
+        rect1.left > rect2.right ||
+        rect1.bottom < rect2.top ||
+        rect1.top > rect2.bottom
+    );
+}
+
+
+/* =====================================================
+   TO'SIQLARNI HARAKATLANTIRISH
+===================================================== */
+
+function updateObstacles() {
+
+    if (!gameRunning) {
         return;
     }
 
@@ -577,20 +904,29 @@ function gameLoop() {
         i--
     ) {
 
-        const obj = obstacles[i];
-
-        obj.y += speed;
-
-        obj.element.style.top =
-            obj.y + "px";
+        const obstacle =
+            obstacles[i];
 
 
-        /* COLLISION */
+        /*
+           PASTGA HARAKAT
+        */
+
+        obstacle.y += speed;
+
+
+        obstacle.element.style.top =
+            obstacle.y + "px";
+
+
+        /*
+           TO'QNASHUV
+        */
 
         if (
-            checkCollision(
+            isCollision(
                 ball,
-                obj.element
+                obstacle.element
             )
         ) {
 
@@ -600,24 +936,35 @@ function gameLoop() {
         }
 
 
-        /* PASSED */
+        /*
+           EKRANDAN CHIQIB KETDI
+        */
 
         if (
-            obj.y >
-            window.innerHeight
+            obstacle.y >
+            window.innerHeight + 100
         ) {
 
-            obj.element.remove();
+            obstacle.element.remove();
 
-            obstacles.splice(i, 1);
+
+            obstacles.splice(
+                i,
+                1
+            );
+
 
             score++;
 
-            scoreText.textContent =
+
+            scoreElement.textContent =
                 score;
 
 
-            /* LEVEL UP */
+            /*
+               HAR 10 OCHKODA
+               LEVEL OSHADI
+            */
 
             if (
                 score % 10 === 0
@@ -625,96 +972,251 @@ function gameLoop() {
 
                 level++;
 
-                levelText.textContent =
+                levelElement.textContent =
                     level;
 
-                speed += 0.7;
+                speed += 0.6;
             }
         }
     }
-
-
-    requestAnimationFrame(gameLoop);
 }
 
 
-gameLoop();
+/* =====================================================
+   ASOSIY GAME LOOP
+===================================================== */
+
+function gameLoop() {
+
+    updateObstacles();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
 
 
-/* OBSTACLE GENERATOR */
+/* =====================================================
+   TO'SIQLAR TIMERI
+===================================================== */
 
-function startObstacleGenerator() {
+function startObstacleTimer() {
+
+    /*
+       OLD TIMERNI O'CHIRAMIZ
+    */
+
+    if (
+        obstacleTimer !== null
+    ) {
+
+        clearInterval(
+            obstacleTimer
+        );
+
+        obstacleTimer = null;
+    }
+
+
+    /*
+       YANGI TIMER
+    */
 
     obstacleTimer =
         setInterval(
-            createObstacle,
-            900
+            function() {
+
+                createObstacle();
+
+            },
+            1000
         );
 }
 
 
-startObstacleGenerator();
+/* =====================================================
+   BARCHA TO'SIQLARNI O'CHIRISH
+===================================================== */
+
+function removeAllObstacles() {
+
+    obstacles.forEach(
+        function(obstacle) {
+
+            if (
+                obstacle.element
+            ) {
+
+                obstacle.element.remove();
+
+            }
+
+        }
+    );
 
 
-/* GAME OVER */
+    obstacles = [];
+}
+
+
+/* =====================================================
+   GAME OVER
+===================================================== */
 
 function endGame() {
 
     gameRunning = false;
 
-    clearInterval(obstacleTimer);
 
-    finalScore.textContent =
+    leftPressed = false;
+
+    rightPressed = false;
+
+
+    /*
+       TIMERNI TO'XTATISH
+    */
+
+    if (
+        obstacleTimer !== null
+    ) {
+
+        clearInterval(
+            obstacleTimer
+        );
+
+        obstacleTimer = null;
+    }
+
+
+    finalScoreElement.textContent =
         "Score: " + score;
+
 
     gameOverScreen.style.display =
         "block";
 }
 
 
-/* RESTART */
+/* =====================================================
+   YANGI O'YIN
+===================================================== */
+
+function startGame() {
+
+    /*
+       TIMERNI TO'XTATISH
+    */
+
+    if (
+        obstacleTimer !== null
+    ) {
+
+        clearInterval(
+            obstacleTimer
+        );
+
+        obstacleTimer = null;
+    }
+
+
+    /*
+       ESKI TO'SIQLARNI
+       TO'LIQ O'CHIRISH
+    */
+
+    removeAllObstacles();
+
+
+    /*
+       O'YINNI RESET
+    */
+
+    score = 0;
+
+    level = 1;
+
+    speed = 4;
+
+    ballPosition = 50;
+
+
+    scoreElement.textContent =
+        "0";
+
+
+    levelElement.textContent =
+        "1";
+
+
+    /*
+       GAME OVERNI YOPISH
+    */
+
+    gameOverScreen.style.display =
+        "none";
+
+
+    /*
+       O'YINNI YOQISH
+    */
+
+    gameRunning = true;
+
+
+    /*
+       BALLNI MARKAZGA QAYTARISH
+    */
+
+    updateBall();
+
+
+    /*
+       TO'SIQLARNI QAYTA BOSHLASH
+    */
+
+    startObstacleTimer();
+}
+
+
+/* =====================================================
+   PLAY AGAIN
+===================================================== */
 
 restartButton.addEventListener(
     "click",
     function() {
 
-        /* REMOVE OLD OBSTACLES */
+        startGame();
 
-        obstacles.forEach(
-            obj => obj.element.remove()
-        );
-
-        obstacles = [];
+    }
+);
 
 
-        /* RESET */
+/* =====================================================
+   EKRAN O'ZGARSA BALLNI
+   QAYTA JOYLASHTIRISH
+===================================================== */
 
-        score = 0;
-
-        level = 1;
-
-        speed = 4;
-
-        ballX = 50;
-
-        scoreText.textContent = "0";
-
-        levelText.textContent = "1";
-
+window.addEventListener(
+    "resize",
+    function() {
 
         updateBall();
 
-
-        gameOverScreen.style.display =
-            "none";
-
-
-        gameRunning = true;
-
-
-        startObstacleGenerator();
     }
 );
+
+
+/* =====================================================
+   START
+===================================================== */
+
+updateBall();
+
+startGame();
+
+gameLoop();
 
 </script>
 
