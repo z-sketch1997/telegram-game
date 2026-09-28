@@ -1382,4 +1382,1559 @@ function drawEnemyFast(){
     ctx.fill();
 
 }
-      
+
+
+function drawEnemyArmored(){
+
+    ctx.fillStyle = "#49596a";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -30,
+        -27,
+        60,
+        54,
+        12
+    );
+
+    ctx.fill();
+
+
+    ctx.strokeStyle = "#9aacbd";
+    ctx.lineWidth = 3;
+
+    ctx.stroke();
+
+
+    ctx.fillStyle = "#182735";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        -8,
+        15,
+        11,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle = "#ff5a3d";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -20,
+        18,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        20,
+        18,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+
+
+function drawBoss(e){
+
+    // glow
+
+    ctx.shadowColor = "#ff263d";
+    ctx.shadowBlur = 30;
+
+    ctx.fillStyle = "#651522";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        0,
+        55,
+        40,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+
+    // wings
+
+    ctx.fillStyle = "#35101b";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-52,0);
+    ctx.lineTo(-100,30);
+    ctx.lineTo(-45,24);
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(52,0);
+    ctx.lineTo(100,30);
+    ctx.lineTo(45,24);
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    // cockpit
+
+    ctx.fillStyle = "#202d42";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        -10,
+        25,
+        15,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // lights
+
+    ctx.fillStyle = "#ffcf40";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -32,
+        13,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        32,
+        13,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // HP bar
+
+    const barW = 90;
+
+    ctx.fillStyle = "rgba(0,0,0,.6)";
+
+    ctx.fillRect(
+        -barW/2,
+        -55,
+        barW,
+        6
+    );
+
+    ctx.fillStyle = "#ff344d";
+
+    ctx.fillRect(
+        -barW/2,
+        -55,
+        barW*(e.hp/e.maxHp),
+        6
+    );
+
+}
+
+
+/* =========================
+   ENEMY UPDATE
+========================= */
+
+function updateEnemies(dt){
+
+    for(let i=enemies.length-1;i>=0;i--){
+
+        const e = enemies[i];
+
+        e.y += e.vy * dt * .06;
+
+
+        // slight horizontal movement
+
+        if(e.type === "fast"){
+
+            e.x +=
+                Math.sin(
+                    e.y * .03
+                ) * .7 * dt * .06;
+
+        }
+
+
+        if(e.type === "boss"){
+
+            e.x +=
+                Math.sin(
+                    e.y * .015
+                ) * .9 * dt * .06;
+
+        }
+
+
+        if(
+            e.y >
+            H + 120
+        ){
+
+            enemies.splice(i,1);
+
+            loseLife();
+
+            continue;
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   POWERUPS
+========================= */
+
+function createPowerup(){
+
+    if(!running) return;
+
+    waitingForPowerup = true;
+
+    const types = [
+        "weapon",
+        "weapon",
+        "weapon",
+        "shield",
+        "coin"
+    ];
+
+    const type =
+        types[
+            Math.floor(
+                Math.random()*types.length
+            )
+        ];
+
+    powerups.push({
+
+        x:60+Math.random()*(W-120),
+
+        y:-50,
+
+        vy:2.7,
+
+        type:type,
+
+        size:34,
+
+        rotation:0
+
+    });
+
+}
+
+
+function updatePowerups(dt){
+
+    for(let i=powerups.length-1;i>=0;i--){
+
+        const p = powerups[i];
+
+        p.y += p.vy * dt * .06;
+
+        p.rotation += dt*.004;
+
+
+        if(
+            p.y >
+            H + 50
+        ){
+
+            powerups.splice(i,1);
+
+            waitingForPowerup = false;
+
+            // Missed powerup:
+            // keyingi powerup tezroq keladi.
+
+            schedulePowerup(1400);
+
+        }
+
+    }
+
+}
+
+
+function drawPowerup(p){
+
+    ctx.save();
+
+    ctx.translate(
+        p.x,
+        p.y
+    );
+
+    ctx.rotate(p.rotation);
+
+
+    const color =
+        p.type === "weapon"
+        ? "#ffca28"
+        : p.type === "shield"
+        ? "#4ddcff"
+        : "#72f58c";
+
+
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 25;
+
+    ctx.fillStyle = color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        p.size/2,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+
+    ctx.fillStyle = "#07111c";
+
+    ctx.font = "bold 20px Arial";
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    if(p.type === "weapon"){
+
+        ctx.fillText("⚡",0,1);
+
+    }else if(p.type === "shield"){
+
+        ctx.fillText("🛡",0,1);
+
+    }else{
+
+        ctx.fillText("🪙",0,1);
+
+    }
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   COINS
+========================= */
+
+function createCoin(x,y){
+
+    coinsList.push({
+
+        x:x,
+        y:y,
+        vy:3,
+        r:13,
+        rotation:0
+
+    });
+
+}
+
+function updateCoins(dt){
+
+    for(let i=coinsList.length-1;i>=0;i--){
+
+        const c = coinsList[i];
+
+        c.y += c.vy*dt*.06;
+
+        c.rotation += dt*.006;
+
+        if(c.y > H+40){
+
+            coinsList.splice(i,1);
+
+        }
+
+    }
+
+}
+
+function drawCoins(){
+
+    for(const c of coinsList){
+
+        ctx.save();
+
+        ctx.translate(c.x,c.y);
+
+        ctx.rotate(c.rotation);
+
+        ctx.shadowColor = "#ffd83d";
+        ctx.shadowBlur = 15;
+
+        ctx.fillStyle = "#ffd83d";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            c.r,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = "#8c5b00";
+
+        ctx.font = "bold 15px Arial";
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(
+            "$",
+            0,
+            1
+        );
+
+        ctx.restore();
+
+    }
+
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function explosion(
+    x,
+    y,
+    color="#ff633f"
+){
+
+    for(let i=0;i<22;i++){
+
+        const angle =
+            Math.random()*Math.PI*2;
+
+        const speed =
+            Math.random()*5+1;
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:Math.cos(angle)*speed,
+
+            vy:Math.sin(angle)*speed,
+
+            life:450+Math.random()*400,
+
+            maxLife:850,
+
+            size:Math.random()*5+2,
+
+            color:color
+
+        });
+
+    }
+
+    sound("boom");
+
+}
+
+
+function updateParticles(dt){
+
+    for(let i=particles.length-1;i>=0;i--){
+
+        const p = particles[i];
+
+        p.x += p.vx*dt*.06;
+        p.y += p.vy*dt*.06;
+
+        p.vy += .04*dt;
+
+        p.life -= dt;
+
+        if(p.life <= 0){
+
+            particles.splice(i,1);
+
+        }
+
+    }
+
+}
+
+
+function drawParticles(){
+
+    for(const p of particles){
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/p.maxLife
+            );
+
+        ctx.fillStyle = p.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+    }
+
+    ctx.globalAlpha = 1;
+
+}
+
+
+/* =========================
+   COLLISION
+========================= */
+
+function hitTest(a,b){
+
+    return (
+
+        a.x-a.width/2 <
+        b.x+b.width/2 &&
+
+        a.x+a.width/2 >
+        b.x-b.width/2 &&
+
+        a.y-a.height/2 <
+        b.y+b.height/2 &&
+
+        a.y+a.height/2 >
+        b.y-b.height/2
+
+    );
+
+}
+
+
+function bulletHit(b,e){
+
+    return (
+
+        b.x > e.x-e.width/2 &&
+
+        b.x < e.x+e.width/2 &&
+
+        b.y < e.y+e.height/2 &&
+
+        b.y+b.height > e.y-e.height/2
+
+    );
+
+}
+
+
+/* =========================
+   COLLISION LOOP
+========================= */
+
+function collisions(){
+
+    // bullets -> enemies
+
+    for(let bi=bullets.length-1;bi>=0;bi--){
+
+        const b = bullets[bi];
+
+        let destroyed = false;
+
+        for(let ei=enemies.length-1;ei>=0;ei--){
+
+            const e = enemies[ei];
+
+            if(bulletHit(b,e)){
+
+                e.hp--;
+
+                bullets.splice(bi,1);
+
+                explosion(
+                    b.x,
+                    b.y,
+                    e.type === "boss"
+                    ? "#ff3155"
+                    : "#ff9b3d"
+                );
+
+                if(e.hp <= 0){
+
+                    score +=
+                        e.type === "boss"
+                        ? 100
+                        : e.type === "armored"
+                        ? 30
+                        : e.type === "fast"
+                        ? 20
+                        : 10;
+
+                    if(
+                        Math.random()<.25
+                    ){
+
+                        createCoin(
+                            e.x,
+                            e.y
+                        );
+
+                    }
+
+                    enemies.splice(ei,1);
+
+                    updateHUD();
+
+                }
+
+                destroyed = true;
+
+                break;
+
+            }
+
+        }
+
+        if(destroyed) continue;
+
+    }
+
+
+    // helicopter -> enemy
+
+    const heliBox = {
+
+        x:helicopter.x,
+
+        y:helicopter.y,
+
+        width:58,
+
+        height:42
+
+    };
+
+
+    for(let i=enemies.length-1;i>=0;i--){
+
+        const e = enemies[i];
+
+        const enemyBox = {
+
+            x:e.x,
+
+            y:e.y,
+
+            width:e.width,
+
+            height:e.height
+
+        };
+
+        if(hitTest(heliBox,enemyBox)){
+
+            enemies.splice(i,1);
+
+            explosion(
+                helicopter.x,
+                helicopter.y,
+                "#ff344f"
+            );
+
+            loseLife();
+
+        }
+
+    }
+
+
+    // powerup
+
+    for(let i=powerups.length-1;i>=0;i--){
+
+        const p = powerups[i];
+
+        const box = {
+
+            x:p.x,
+
+            y:p.y,
+
+            width:p.size,
+
+            height:p.size
+
+        };
+
+        if(hitTest(heliBox,box)){
+
+            collectPowerup(p);
+
+            powerups.splice(i,1);
+
+            waitingForPowerup = false;
+
+        }
+
+    }
+
+
+    // coins
+
+    for(let i=coinsList.length-1;i>=0;i--){
+
+        const c = coinsList[i];
+
+        const dx =
+            c.x-helicopter.x;
+
+        const dy =
+            c.y-helicopter.y;
+
+        const distance =
+            Math.sqrt(dx*dx+dy*dy);
+
+        if(distance < 35){
+
+            coins++;
+
+            coinsList.splice(i,1);
+
+            sound("coin");
+
+            updateHUD();
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   POWERUP COLLECTION
+========================= */
+
+let shield = false;
+
+function collectPowerup(p){
+
+    sound("power");
+
+    if(p.type === "weapon"){
+
+        if(weaponLevel < 5){
+
+            weaponLevel++;
+
+        }
+
+        // power-up kelganidan keyin
+        // enemy count oshadi.
+
+        enemyTarget =
+            Math.min(
+                2 + weaponLevel,
+                9
+            );
+
+        enemySpeed =
+            Math.min(
+                2.1 + weaponLevel*.42,
+                6
+            );
+
+        level =
+            Math.max(
+                level,
+                weaponLevel
+            );
+
+        updateHUD();
+
+        // KEYINGI POWER-UP
+        // dushmanlar kuchaygandan keyin keladi.
+
+        schedulePowerup(
+            4000
+        );
+
+    }
+
+    if(p.type === "shield"){
+
+        shield = true;
+
+        schedulePowerup(
+            3500
+        );
+
+    }
+
+    if(p.type === "coin"){
+
+        coins += 10;
+
+        updateHUD();
+
+        schedulePowerup(
+            3000
+        );
+
+    }
+
+}
+
+
+/* =========================
+   LIFE
+========================= */
+
+function loseLife(){
+
+    if(shield){
+
+        shield = false;
+
+        return;
+
+    }
+
+    lives--;
+
+    updateHUD();
+
+    if(lives <= 0){
+
+        endGame();
+
+    }
+
+}
+
+
+/* =========================
+   DIFFICULTY
+========================= */
+
+function maintainEnemies(){
+
+    if(!running) return;
+
+    while(
+        enemies.length <
+        enemyTarget
+    ){
+
+        createEnemy();
+
+    }
+
+}
+
+
+/* =========================
+   POWERUP SCHEDULER
+========================= */
+
+function schedulePowerup(delay){
+
+    clearTimeout(
+        spawnPowerupTimer
+    );
+
+    spawnPowerupTimer =
+        setTimeout(
+            ()=>{
+
+                if(
+                    running &&
+                    !waitingForPowerup
+                ){
+
+                    createPowerup();
+
+                }
+
+            },
+            delay
+        );
+
+}
+
+
+/* =========================
+   SHOOT TIMER
+========================= */
+
+function automaticFire(dt){
+
+    shootTimer += dt;
+
+    const interval =
+        weaponLevel >= 5
+        ? 170
+        : weaponLevel >= 4
+        ? 210
+        : weaponLevel >= 3
+        ? 250
+        : weaponLevel >= 2
+        ? 290
+        : 340;
+
+    if(
+        shootTimer >= interval
+    ){
+
+        shootTimer = 0;
+
+        fire();
+
+    }
+
+}
+
+
+/* =========================
+   CONTROL
+========================= */
+
+let dragging = false;
+
+let touchOffset = 0;
+
+function pointerStart(clientX){
+
+    if(!running) return;
+
+    dragging = true;
+
+    touchOffset =
+        helicopter.x-clientX;
+
+}
+
+function pointerMove(clientX){
+
+    if(!running || !dragging)
+        return;
+
+    targetX =
+        clientX + touchOffset;
+
+}
+
+function pointerEnd(){
+
+    dragging = false;
+
+}
+
+
+/* TOUCH */
+
+canvas.addEventListener(
+    "touchstart",
+    e=>{
+
+        if(!running) return;
+
+        e.preventDefault();
+
+        const t =
+            e.touches[0];
+
+        pointerStart(
+            t.clientX
+        );
+
+    },
+    {passive:false}
+);
+
+
+canvas.addEventListener(
+    "touchmove",
+    e=>{
+
+        if(!running) return;
+
+        e.preventDefault();
+
+        const t =
+            e.touches[0];
+
+        pointerMove(
+            t.clientX
+        );
+
+    },
+    {passive:false}
+);
+
+
+canvas.addEventListener(
+    "touchend",
+    e=>{
+
+        e.preventDefault();
+
+        pointerEnd();
+
+    },
+    {passive:false}
+);
+
+
+/* MOUSE */
+
+canvas.addEventListener(
+    "mousedown",
+    e=>{
+
+        pointerStart(
+            e.clientX
+        );
+
+    }
+);
+
+canvas.addEventListener(
+    "mousemove",
+    e=>{
+
+        pointerMove(
+            e.clientX
+        );
+
+    }
+);
+
+canvas.addEventListener(
+    "mouseup",
+    pointerEnd
+);
+
+canvas.addEventListener(
+    "mouseleave",
+    pointerEnd
+);
+
+
+/* =========================
+   HELICOPTER MOVEMENT
+========================= */
+
+function updateHelicopter(dt){
+
+    if(!running) return;
+
+    if(!dragging){
+
+        targetX = helicopter.x;
+
+    }
+
+    const minX =
+        helicopter.width/2 + 10;
+
+    const maxX =
+        W-helicopter.width/2-10;
+
+    targetX =
+        Math.max(
+            minX,
+            Math.min(
+                maxX,
+                targetX
+            )
+        );
+
+
+    // smooth movement
+
+    helicopter.x +=
+        (targetX-helicopter.x)
+        *0.28;
+
+    // MUHIM:
+    // vertolyotning Y koordinatasi
+    // har frame pastki joyda qayta
+    // hisoblanadi.
+
+    helicopter.y =
+        H - 145;
+
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD(){
+
+    document.getElementById(
+        "scoreText"
+    ).textContent = score;
+
+    document.getElementById(
+        "coinText"
+    ).textContent = coins;
+
+    document.getElementById(
+        "levelText"
+    ).textContent = level;
+
+    document.getElementById(
+        "weaponText"
+    ).textContent =
+        "Lv."+weaponLevel;
+
+    document.getElementById(
+        "bestText"
+    ).textContent = best;
+
+
+    let hearts = "";
+
+    for(let i=0;i<3;i++){
+
+        hearts +=
+            i < lives
+            ? "♥ "
+            : "♡ ";
+
+    }
+
+    document.getElementById(
+        "lives"
+    ).textContent = hearts;
+
+}
+
+
+/* =========================
+   GAME LOOP
+========================= */
+
+function gameLoop(time){
+
+    if(!lastTime)
+        lastTime = time;
+
+    let dt =
+        time-lastTime;
+
+    lastTime = time;
+
+    dt =
+        Math.min(
+            dt,
+            40
+        );
+
+
+    drawBackground(dt);
+
+
+    if(running){
+
+        updateHelicopter(dt);
+
+        automaticFire(dt);
+
+        updateBullets(dt);
+
+        updateEnemies(dt);
+
+        updatePowerups(dt);
+
+        updateCoins(dt);
+
+        updateParticles(dt);
+
+        collisions();
+
+        maintainEnemies();
+
+    }
+
+
+    drawCoins();
+
+    for(const p of powerups)
+        drawPowerup(p);
+
+    for(const e of enemies)
+        drawEnemy(e);
+
+    drawBullets();
+
+    drawParticles();
+
+    drawHelicopter(dt);
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================
+   CLEAR GAME
+========================= */
+
+function clearObjects(){
+
+    bullets = [];
+    enemies = [];
+    powerups = [];
+    particles = [];
+    coinsList = [];
+
+}
+
+
+/* =========================
+   START GAME
+========================= */
+
+function startGame(){
+
+    audio();
+
+    clearTimeout(
+        spawnPowerupTimer
+    );
+
+    clearTimeout(
+        nextDifficultyTimer
+    );
+
+
+    clearObjects();
+
+
+    score = 0;
+    coins = 0;
+    level = 1;
+    lives = 3;
+
+    weaponLevel = 1;
+
+    enemyTarget = 2;
+
+    enemySpeed = 2.1;
+
+    shield = false;
+
+    waitingForPowerup = false;
+
+    shootTimer = 0;
+
+    dragging = false;
+
+
+    /*
+        MUHIM TUZATISH:
+
+        Vertolyot birinchi startdayoq
+        pastki pozitsiyaga majburan
+        o'rnatiladi.
+
+        Oldingi versiyadagi "birinchi
+        o'yinda yuqoridan boshlash"
+        muammosi shu yerda yo'q.
+    */
+
+    helicopter.x =
+        W / 2;
+
+    helicopter.y =
+        H - 145;
+
+
+    targetX =
+        helicopter.x;
+
+
+    updateHUD();
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "none";
+
+
+    running = true;
+
+
+    // Dastlab 2 ta enemy
+
+    createEnemy();
+    createEnemy();
+
+
+    /*
+       MUHIM:
+
+       Avval POWER-UP keladi.
+       Power-up olinmaguncha enemy
+       soni ko'paytirilmaydi.
+    */
+
+    schedulePowerup(
+        1200
+    );
+
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function endGame(){
+
+    if(!running) return;
+
+    running = false;
+
+    dragging = false;
+
+
+    clearTimeout(
+        spawnPowerupTimer
+    );
+
+    clearTimeout(
+        nextDifficultyTimer
+    );
+
+
+    if(score > best){
+
+        best = score;
+
+        localStorage.setItem(
+            "airStrikeBest",
+            best
+        );
+
+    }
+
+
+    document.getElementById(
+        "finalScore"
+    ).textContent = score;
+
+    document.getElementById(
+        "finalBest"
+    ).textContent = best;
+
+
+    document.getElementById(
+        "menu"
+    ).style.display = "none";
+
+    document.getElementById(
+        "howPanel"
+    ).style.display = "none";
+
+    document.getElementById(
+        "gameOver"
+    ).style.display = "block";
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "flex";
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   MENU
+========================= */
+
+function showMenu(){
+
+    running = false;
+
+    dragging = false;
+
+    clearTimeout(
+        spawnPowerupTimer
+    );
+
+    clearObjects();
+
+
+    document.getElementById(
+        "menu"
+    ).style.display = "block";
+
+    document.getElementById(
+        "howPanel"
+    ).style.display = "none";
+
+    document.getElementById(
+        "gameOver"
+    ).style.display = "none";
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "flex";
+
+}
+
+
+function showHow(){
+
+    document.getElementById(
+        "menu"
+    ).style.display = "none";
+
+    document.getElementById(
+        "gameOver"
+    ).style.display = "none";
+
+    document.getElementById(
+        "howPanel"
+    ).style.display = "block";
+
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+document.getElementById(
+    "startBtn"
+).addEventListener(
+    "click",
+    startGame
+);
+
+
+document.getElementById(
+    "againBtn"
+).addEventListener(
+    "click",
+    startGame
+);
+
+
+document.getElementById(
+    "menuBtn"
+).addEventListener(
+    "click",
+    showMenu
+);
+
+
+document.getElementById(
+    "howBtn"
+).addEventListener(
+    "click",
+    showHow
+);
+
+
+document.getElementById(
+    "backBtn"
+).addEventListener(
+    "click",
+    showMenu
+);
+
+
+/* =========================
+   INITIALIZE
+========================= */
+
+resize();
+
+updateHUD();
+
+showMenu();
+
+requestAnimationFrame(
+    gameLoop
+);
+
+</script>
+
+</body>
+</html>
