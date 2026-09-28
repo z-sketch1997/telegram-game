@@ -1,1224 +1,1385 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>Ball Runner</title>
+<title>Helicopter Assault</title>
 
 <style>
-
-/* =========================
-   RESET
-========================= */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    touch-action: none;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#05070d;
+    font-family:Arial,Helvetica,sans-serif;
+    touch-action:none;
 }
 
-body {
-    background: #111;
-    font-family: Arial, sans-serif;
+#game{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 50% 20%,#182a45 0%,#08111e 45%,#020409 100%);
 }
 
+canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+}
 
-/* =========================
-   GAME
-========================= */
+#hud{
+    position:absolute;
+    top:12px;
+    left:12px;
+    right:12px;
 
-#game {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
 
-    position: relative;
+    color:white;
+    font-weight:bold;
+    font-size:14px;
 
-    width: 100vw;
-    height: 100vh;
+    pointer-events:none;
+    z-index:20;
+}
 
-    overflow: hidden;
+.hudBox{
+    background:rgba(4,8,15,.68);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:8px 11px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+
+#leftHud{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+#rightHud{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:5px;
+}
+
+#lives{
+    color:#ff4b61;
+    letter-spacing:2px;
+}
+
+#weaponText{
+    color:#55d9ff;
+}
+
+#powerText{
+    color:#ffe066;
+}
+
+#overlay{
+    position:absolute;
+    inset:0;
+    z-index:50;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        radial-gradient(circle at center,
+        rgba(22,45,76,.75),
+        rgba(2,5,10,.96));
+
+    pointer-events:auto;
+}
+
+.panel{
+    width:min(90%,420px);
+    padding:28px 24px;
+
+    border-radius:24px;
 
     background:
         linear-gradient(
-            90deg,
-            #222 0%,
-            #333 14%,
-            #111 14%,
-            #111 86%,
-            #333 86%,
-            #222 100%
-        );
-}
-
-
-/* =========================
-   ROAD
-========================= */
-
-#road {
-
-    position: absolute;
-
-    left: 14%;
-    top: 0;
-
-    width: 72%;
-    height: 100%;
-
-    overflow: hidden;
-
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            #292929 0px,
-            #292929 80px,
-            #333 80px,
-            #333 160px
+            145deg,
+            rgba(25,39,62,.96),
+            rgba(5,10,18,.97)
         );
 
-    border-left: 5px solid white;
-    border-right: 5px solid white;
-}
-
-
-/* =========================
-   ROAD LINES
-========================= */
-
-.road-line {
-
-    position: absolute;
-
-    width: 6px;
-    height: 70px;
-
-    background: white;
-
-    opacity: 0.75;
-
-    animation:
-        roadAnimation 0.7s
-        linear infinite;
-}
-
-.road-line.one {
-    left: 33%;
-}
-
-.road-line.two {
-    left: 66%;
-}
-
-@keyframes roadAnimation {
-
-    from {
-        transform: translateY(-120px);
-    }
-
-    to {
-        transform: translateY(100vh);
-    }
-}
-
-
-/* =========================
-   SCORE
-========================= */
-
-#scoreBox {
-
-    position: absolute;
-
-    top: 20px;
-    left: 20px;
-
-    z-index: 50;
-
-    padding: 10px 16px;
-
-    color: white;
-
-    font-size: 22px;
-    font-weight: bold;
-
-    background: rgba(0,0,0,0.65);
-
-    border-radius: 12px;
-}
-
-
-/* =========================
-   LEVEL
-========================= */
-
-#levelBox {
-
-    position: absolute;
-
-    top: 20px;
-    right: 20px;
-
-    z-index: 50;
-
-    padding: 10px 16px;
-
-    color: white;
-
-    font-size: 18px;
-    font-weight: bold;
-
-    background: rgba(0,0,0,0.65);
-
-    border-radius: 12px;
-}
-
-
-/* =========================
-   BALL
-========================= */
-
-#ball {
-
-    position: absolute;
-
-    width: 65px;
-    height: 65px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle at 30% 25%,
-            white 0%,
-            #7df9ff 10%,
-            #00b7ff 40%,
-            #0066ff 75%,
-            #001d70 100%
-        );
+    border:1px solid rgba(111,208,255,.25);
 
     box-shadow:
-        0 0 15px #00bfff,
-        0 0 30px rgba(0,191,255,0.6);
+        0 20px 70px rgba(0,0,0,.65),
+        inset 0 1px rgba(255,255,255,.08);
 
-    z-index: 20;
+    text-align:center;
+    color:white;
 }
 
+.title{
+    font-size:36px;
+    font-weight:900;
+    letter-spacing:2px;
 
-/* =========================
-   OBSTACLE
-========================= */
+    background:linear-gradient(90deg,#65e6ff,#ffffff,#6b8cff);
+    -webkit-background-clip:text;
+    color:transparent;
 
-.obstacle {
+    margin-bottom:8px;
+}
 
-    position: absolute;
+.subtitle{
+    color:#8ea6bd;
+    font-size:14px;
+    margin-bottom:25px;
+}
 
-    width: 75px;
-    height: 75px;
+button{
+    width:100%;
+    border:0;
+    border-radius:14px;
 
-    background:
-        linear-gradient(
-            135deg,
-            #ff3333,
-            #990000
-        );
+    padding:15px 18px;
+    margin-top:10px;
 
-    border: 4px solid #ffaaaa;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
 
-    border-radius: 12px;
+    background:linear-gradient(135deg,#1b9cff,#5755ff);
 
     box-shadow:
-        0 0 20px rgba(255,0,0,0.8);
+        0 8px 25px rgba(30,130,255,.28);
 
-    z-index: 15;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    color: white;
-
-    font-size: 38px;
-    font-weight: bold;
+    cursor:pointer;
+    touch-action:manipulation;
 }
 
-
-/* =========================
-   CONTROL BUTTONS
-========================= */
-
-.controls {
-
-    position: absolute;
-
-    left: 0;
-    bottom: 25px;
-
-    width: 100%;
-
-    padding: 0 25px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    z-index: 60;
+button:active{
+    transform:scale(.97);
 }
 
-
-.control {
-
-    width: 120px;
-    height: 120px;
-
-    border-radius: 50%;
-
-    border: 4px solid rgba(255,255,255,0.8);
-
-    background:
-        radial-gradient(
-            circle,
-            #555,
-            #222
-        );
-
-    color: white;
-
-    font-size: 55px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    user-select: none;
-    -webkit-user-select: none;
-
-    box-shadow:
-        0 5px 20px rgba(0,0,0,0.6);
+.secondary{
+    background:rgba(255,255,255,.08);
+    box-shadow:none;
 }
 
-
-.control:active {
-
-    transform: scale(0.92);
+#gameOver{
+    display:none;
 }
 
-
-/* =========================
-   GAME OVER
-========================= */
-
-#gameOver {
-
-    display: none;
-
-    position: absolute;
-
-    top: 50%;
-    left: 50%;
-
-    transform: translate(-50%, -50%);
-
-    width: 85%;
-    max-width: 400px;
-
-    padding: 35px;
-
-    z-index: 100;
-
-    background: rgba(0,0,0,0.95);
-
-    color: white;
-
-    text-align: center;
-
-    border-radius: 25px;
+.bigScore{
+    font-size:48px;
+    font-weight:900;
+    margin:8px 0;
+    color:#fff;
 }
 
-
-#gameOver h1 {
-
-    margin-bottom: 15px;
-
-    font-size: 40px;
+.smallInfo{
+    color:#91a5ba;
+    font-size:13px;
+    margin-top:8px;
 }
 
+#hint{
+    position:absolute;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
 
-#finalScore {
+    color:rgba(255,255,255,.45);
+    font-size:12px;
 
-    margin-bottom: 25px;
-
-    font-size: 25px;
+    pointer-events:none;
+    z-index:15;
 }
 
-
-#restart {
-
-    padding: 15px 35px;
-
-    border: none;
-    border-radius: 15px;
-
-    background: #00aaff;
-
-    color: white;
-
-    font-size: 20px;
-    font-weight: bold;
+.hidden{
+    display:none !important;
 }
-
 </style>
-
 </head>
-
 
 <body>
 
-
 <div id="game">
 
+    <canvas id="canvas"></canvas>
 
-    <!-- ROAD -->
+    <div id="hud">
 
-    <div id="road">
+        <div id="leftHud">
 
-        <div class="road-line one"></div>
+            <div class="hudBox">
+                ❤️ <span id="lives">♥ ♥ ♥</span>
+            </div>
 
-        <div class="road-line two"></div>
+            <div class="hudBox">
+                ⚡ Weapon: <span id="weaponText">Lv.1</span>
+            </div>
 
-    </div>
-
-
-    <!-- SCORE -->
-
-    <div id="scoreBox">
-
-        SCORE:
-        <span id="score">0</span>
-
-    </div>
-
-
-    <!-- LEVEL -->
-
-    <div id="levelBox">
-
-        LEVEL:
-        <span id="level">1</span>
-
-    </div>
-
-
-    <!-- BALL -->
-
-    <div id="ball"></div>
-
-
-    <!-- CONTROLS -->
-
-    <div class="controls">
-
-        <div
-            class="control"
-            id="leftButton">
-
-            ◀
+            <div class="hudBox">
+                ⭐ Level: <span id="levelText">1</span>
+            </div>
 
         </div>
 
+        <div id="rightHud">
 
-        <div
-            class="control"
-            id="rightButton">
+            <div class="hudBox">
+                Score: <span id="scoreText">0</span>
+            </div>
 
-            ▶
+            <div class="hudBox">
+                🪙 <span id="coinText">0</span>
+            </div>
+
+            <div class="hudBox">
+                🏆 <span id="bestText">0</span>
+            </div>
 
         </div>
 
     </div>
 
-
-    <!-- GAME OVER -->
-
-    <div id="gameOver">
-
-        <h1>
-            GAME OVER
-        </h1>
-
-        <div id="finalScore">
-            Score: 0
-        </div>
-
-        <button id="restart">
-            PLAY AGAIN
-        </button>
-
+    <div id="hint">
+        Drag your finger to control the helicopter
     </div>
 
+    <div id="overlay">
+
+        <div class="panel" id="menu">
+
+            <div class="title">AIR STRIKE</div>
+
+            <div class="subtitle">
+                Helicopter Assault
+            </div>
+
+            <button id="startBtn">
+                🚁 START GAME
+            </button>
+
+            <button id="howBtn" class="secondary">
+                ❓ HOW TO PLAY
+            </button>
+
+        </div>
+
+        <div class="panel" id="howPanel">
+
+            <div class="title" style="font-size:28px">
+                HOW TO PLAY
+            </div>
+
+            <div class="subtitle" style="line-height:1.7">
+
+                Drag your finger left and right
+                to control the helicopter.<br><br>
+
+                🔫 The helicopter fires automatically.<br>
+                💥 Destroy incoming enemies.<br>
+                ⚡ Catch weapon power-ups.<br>
+                🪙 Collect coins.<br>
+                ❤️ Protect your 3 lives.<br><br>
+
+                Power-ups arrive before the enemy
+                formation becomes stronger.
+
+            </div>
+
+            <button id="backBtn" class="secondary">
+                ← BACK
+            </button>
+
+        </div>
+
+        <div class="panel" id="gameOver">
+
+            <div class="title">
+                GAME OVER
+            </div>
+
+            <div class="bigScore" id="finalScore">
+                0
+            </div>
+
+            <div class="smallInfo">
+                Best Score: <span id="finalBest">0</span>
+            </div>
+
+            <button id="againBtn">
+                🔄 PLAY AGAIN
+            </button>
+
+            <button id="menuBtn" class="secondary">
+                MENU
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
 
 <script>
 
-/* =====================================================
-   ELEMENTLAR
-===================================================== */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-const game =
-    document.getElementById("game");
+let W = 0;
+let H = 0;
+let DPR = 1;
 
-const road =
-    document.getElementById("road");
+function resize(){
 
-const ball =
-    document.getElementById("ball");
+    DPR = Math.min(window.devicePixelRatio || 1,2);
 
-const scoreElement =
-    document.getElementById("score");
+    W = window.innerWidth;
+    H = window.innerHeight;
 
-const levelElement =
-    document.getElementById("level");
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
 
-const leftButton =
-    document.getElementById("leftButton");
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
 
-const rightButton =
-    document.getElementById("rightButton");
+    ctx.setTransform(DPR,0,0,DPR,0,0);
 
-const gameOverScreen =
-    document.getElementById("gameOver");
+    if(!running){
 
-const finalScoreElement =
-    document.getElementById("finalScore");
+        helicopter.x = W / 2;
+        helicopter.y = H - 145;
 
-const restartButton =
-    document.getElementById("restart");
+    }else{
 
-
-/* =====================================================
-   O'YIN O'ZGARUVCHILARI
-===================================================== */
-
-let gameRunning = false;
-
-let score = 0;
-
-let level = 1;
-
-let speed = 4;
-
-let ballPosition = 50;
-
-let obstacles = [];
-
-let obstacleTimer = null;
-
-let leftPressed = false;
-
-let rightPressed = false;
-
-
-/* =====================================================
-   BALL JOYLASHUVI
-===================================================== */
-
-function updateBall() {
-
-    const roadWidth =
-        road.clientWidth;
-
-    const ballWidth =
-        ball.clientWidth;
-
-    const availableWidth =
-        roadWidth - ballWidth;
-
-    let x =
-        availableWidth *
-        (ballPosition / 100);
-
-
-    if (x < 0) {
-        x = 0;
-    }
-
-
-    if (x > availableWidth) {
-        x = availableWidth;
-    }
-
-
-    ball.style.left =
-        (road.offsetLeft + x) + "px";
-
-
-    ball.style.top =
-        (window.innerHeight - 220) + "px";
-}
-
-
-/* =====================================================
-   CHAPGA
-===================================================== */
-
-function moveLeft() {
-
-    if (!gameRunning) {
-        return;
-    }
-
-
-    ballPosition -= 1.5;
-
-
-    if (ballPosition < 0) {
-        ballPosition = 0;
-    }
-
-
-    updateBall();
-}
-
-
-/* =====================================================
-   O'NGGA
-===================================================== */
-
-function moveRight() {
-
-    if (!gameRunning) {
-        return;
-    }
-
-
-    ballPosition += 1.5;
-
-
-    if (ballPosition > 100) {
-        ballPosition = 100;
-    }
-
-
-    updateBall();
-}
-
-
-/* =====================================================
-   TOUCH CONTROL
-===================================================== */
-
-leftButton.addEventListener(
-    "touchstart",
-    function(event) {
-
-        event.preventDefault();
-
-        leftPressed = true;
-
-    },
-    { passive: false }
-);
-
-
-leftButton.addEventListener(
-    "touchend",
-    function(event) {
-
-        event.preventDefault();
-
-        leftPressed = false;
-
-    },
-    { passive: false }
-);
-
-
-leftButton.addEventListener(
-    "touchcancel",
-    function() {
-
-        leftPressed = false;
-
-    }
-);
-
-
-rightButton.addEventListener(
-    "touchstart",
-    function(event) {
-
-        event.preventDefault();
-
-        rightPressed = true;
-
-    },
-    { passive: false }
-);
-
-
-rightButton.addEventListener(
-    "touchend",
-    function(event) {
-
-        event.preventDefault();
-
-        rightPressed = false;
-
-    },
-    { passive: false }
-);
-
-
-rightButton.addEventListener(
-    "touchcancel",
-    function() {
-
-        rightPressed = false;
-
-    }
-);
-
-
-/* =====================================================
-   MOUSE CONTROL
-===================================================== */
-
-leftButton.addEventListener(
-    "mousedown",
-    function() {
-
-        leftPressed = true;
-
-    }
-);
-
-
-leftButton.addEventListener(
-    "mouseup",
-    function() {
-
-        leftPressed = false;
-
-    }
-);
-
-
-leftButton.addEventListener(
-    "mouseleave",
-    function() {
-
-        leftPressed = false;
-
-    }
-);
-
-
-rightButton.addEventListener(
-    "mousedown",
-    function() {
-
-        rightPressed = true;
-
-    }
-);
-
-
-rightButton.addEventListener(
-    "mouseup",
-    function() {
-
-        rightPressed = false;
-
-    }
-);
-
-
-rightButton.addEventListener(
-    "mouseleave",
-    function() {
-
-        rightPressed = false;
-
-    }
-);
-
-
-/* =====================================================
-   UZLUKSIZ BOSHQARUV
-===================================================== */
-
-function controlLoop() {
-
-    if (leftPressed) {
-        moveLeft();
-    }
-
-
-    if (rightPressed) {
-        moveRight();
-    }
-
-
-    requestAnimationFrame(
-        controlLoop
-    );
-}
-
-
-controlLoop();
-
-
-/* =====================================================
-   TO'SIQ YARATISH
-===================================================== */
-
-function createObstacle() {
-
-    if (!gameRunning) {
-        return;
-    }
-
-
-    const obstacle =
-        document.createElement("div");
-
-
-    obstacle.className =
-        "obstacle";
-
-
-    obstacle.textContent =
-        "⚠";
-
-
-    /*
-       TO'SIQNI YO'L ICHIGA
-       JOYLASHTIRAMIZ
-    */
-
-    const roadWidth =
-        road.clientWidth;
-
-    const obstacleWidth =
-        75;
-
-
-    const maximumX =
-        roadWidth -
-        obstacleWidth;
-
-
-    const randomX =
-        Math.random() *
-        maximumX;
-
-
-    /*
-       ABSOLUTE PIXEL
-       KOORDINATA
-    */
-
-    const obstacleX =
-        road.offsetLeft +
-        randomX;
-
-
-    obstacle.style.left =
-        obstacleX + "px";
-
-
-    obstacle.style.top =
-        "-90px";
-
-
-    game.appendChild(
-        obstacle
-    );
-
-
-    obstacles.push({
-
-        element: obstacle,
-
-        y: -90
-
-    });
-}
-
-
-/* =====================================================
-   TO'QNASHUVNI TEKSHIRISH
-===================================================== */
-
-function isCollision(
-    object1,
-    object2
-) {
-
-    const rect1 =
-        object1.getBoundingClientRect();
-
-    const rect2 =
-        object2.getBoundingClientRect();
-
-
-    return !(
-        rect1.right < rect2.left ||
-        rect1.left > rect2.right ||
-        rect1.bottom < rect2.top ||
-        rect1.top > rect2.bottom
-    );
-}
-
-
-/* =====================================================
-   TO'SIQLARNI HARAKATLANTIRISH
-===================================================== */
-
-function updateObstacles() {
-
-    if (!gameRunning) {
-        return;
-    }
-
-
-    for (
-        let i = obstacles.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        const obstacle =
-            obstacles[i];
-
-
-        /*
-           PASTGA HARAKAT
-        */
-
-        obstacle.y += speed;
-
-
-        obstacle.element.style.top =
-            obstacle.y + "px";
-
-
-        /*
-           TO'QNASHUV
-        */
-
-        if (
-            isCollision(
-                ball,
-                obstacle.element
-            )
-        ) {
-
-            endGame();
-
-            return;
-        }
-
-
-        /*
-           EKRANDAN CHIQIB KETDI
-        */
-
-        if (
-            obstacle.y >
-            window.innerHeight + 100
-        ) {
-
-            obstacle.element.remove();
-
-
-            obstacles.splice(
-                i,
-                1
+        helicopter.x =
+            Math.max(
+                helicopter.width / 2,
+                Math.min(
+                    W - helicopter.width / 2,
+                    helicopter.x
+                )
             );
 
+        helicopter.y = H - 145;
 
-            score++;
+    }
+}
+
+window.addEventListener("resize",resize);
 
 
-            scoreElement.textContent =
-                score;
+/* =========================
+   GAME STATE
+========================= */
+
+let running = false;
+
+let score = 0;
+let coins = 0;
+let level = 1;
+let lives = 3;
+
+let best =
+    Number(localStorage.getItem("airStrikeBest") || 0);
+
+let weaponLevel = 1;
+
+let enemyTarget = 2;
+let enemySpeed = 2.1;
+
+let spawnPowerupTimer = null;
+let nextDifficultyTimer = null;
+
+let waitingForPowerup = false;
+
+let lastTime = 0;
+let shootTimer = 0;
+
+let targetX = 0;
 
 
-            /*
-               HAR 10 OCHKODA
-               LEVEL OSHADI
-            */
+/* =========================
+   OBJECTS
+========================= */
 
-            if (
-                score % 10 === 0
-            ) {
+const helicopter = {
 
-                level++;
+    x:0,
 
-                levelElement.textContent =
-                    level;
+    // Muhim:
+    // vertolyot har doim ekranning pastki qismidan boshlanadi.
+    y:0,
 
-                speed += 0.6;
-            }
+    width:82,
+    height:58,
+
+    rotor:0,
+    recoil:0
+};
+
+let bullets = [];
+let enemies = [];
+let powerups = [];
+let particles = [];
+let coinsList = [];
+let stars = [];
+
+
+/* =========================
+   STARS / BACKGROUND
+========================= */
+
+function createStars(){
+
+    stars = [];
+
+    for(let i=0;i<100;i++){
+
+        stars.push({
+
+            x:Math.random()*W,
+
+            y:Math.random()*H,
+
+            size:Math.random()*2+0.5,
+
+            speed:Math.random()*0.35+0.1,
+
+            alpha:Math.random()*0.6+0.2
+
+        });
+
+    }
+}
+
+createStars();
+
+
+/* =========================
+   AUDIO
+========================= */
+
+let audioCtx = null;
+
+function audio(){
+
+    if(!audioCtx){
+
+        try{
+
+            audioCtx =
+                new (window.AudioContext ||
+                window.webkitAudioContext)();
+
+        }catch(e){
+
+            return null;
+
         }
+
     }
+
+    if(audioCtx.state === "suspended"){
+
+        audioCtx.resume();
+
+    }
+
+    return audioCtx;
 }
 
+function sound(type){
 
-/* =====================================================
-   ASOSIY GAME LOOP
-===================================================== */
+    const ac = audio();
 
-function gameLoop() {
+    if(!ac) return;
 
-    updateObstacles();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
 
-    requestAnimationFrame(
-        gameLoop
+    osc.connect(gain);
+    gain.connect(ac.destination);
+
+    let freq = 300;
+    let duration = .08;
+
+    if(type === "shoot"){
+
+        freq = 650;
+        duration = .035;
+
+    }
+
+    if(type === "hit"){
+
+        freq = 130;
+        duration = .1;
+
+    }
+
+    if(type === "power"){
+
+        freq = 900;
+        duration = .18;
+
+    }
+
+    if(type === "coin"){
+
+        freq = 1000;
+        duration = .08;
+
+    }
+
+    if(type === "boom"){
+
+        freq = 80;
+        duration = .22;
+
+    }
+
+    osc.frequency.value = freq;
+    osc.type = "square";
+
+    gain.gain.setValueAtTime(.035,ac.currentTime);
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        ac.currentTime + duration
     );
+
+    osc.start();
+    osc.stop(ac.currentTime + duration);
+
 }
 
 
-/* =====================================================
-   TO'SIQLAR TIMERI
-===================================================== */
+/* =========================
+   BACKGROUND
+========================= */
 
-function startObstacleTimer() {
+function drawBackground(dt){
 
-    /*
-       OLD TIMERNI O'CHIRAMIZ
-    */
+    const gradient =
+        ctx.createLinearGradient(0,0,0,H);
 
-    if (
-        obstacleTimer !== null
-    ) {
+    gradient.addColorStop(0,"#071426");
+    gradient.addColorStop(.55,"#08111e");
+    gradient.addColorStop(1,"#020409");
 
-        clearInterval(
-            obstacleTimer
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0,0,W,H);
+
+
+    // moon / light
+
+    const moonX = W * .78;
+    const moonY = H * .17;
+    const moonR = 48;
+
+    const moonGlow =
+        ctx.createRadialGradient(
+            moonX,moonY,5,
+            moonX,moonY,100
         );
 
-        obstacleTimer = null;
-    }
+    moonGlow.addColorStop(0,"rgba(150,220,255,.2)");
+    moonGlow.addColorStop(1,"rgba(0,0,0,0)");
+
+    ctx.fillStyle = moonGlow;
+
+    ctx.beginPath();
+    ctx.arc(moonX,moonY,100,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(220,240,255,.65)";
+
+    ctx.beginPath();
+    ctx.arc(moonX,moonY,moonR,0,Math.PI*2);
+    ctx.fill();
 
 
-    /*
-       YANGI TIMER
-    */
+    // stars
 
-    obstacleTimer =
-        setInterval(
-            function() {
+    for(const star of stars){
 
-                createObstacle();
+        star.y += star.speed * dt * .06;
 
-            },
-            1000
-        );
-}
+        if(star.y > H){
 
-
-/* =====================================================
-   BARCHA TO'SIQLARNI O'CHIRISH
-===================================================== */
-
-function removeAllObstacles() {
-
-    obstacles.forEach(
-        function(obstacle) {
-
-            if (
-                obstacle.element
-            ) {
-
-                obstacle.element.remove();
-
-            }
+            star.y = -5;
+            star.x = Math.random()*W;
 
         }
+
+        ctx.globalAlpha = star.alpha;
+
+        ctx.fillStyle = "#d9f4ff";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            star.x,
+            star.y,
+            star.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+    }
+
+    ctx.globalAlpha = 1;
+
+
+    // distant city
+
+    const groundY = H - 65;
+
+    ctx.fillStyle = "#03070d";
+
+    ctx.fillRect(
+        0,
+        groundY,
+        W,
+        70
+    );
+
+    for(let x=0;x<W;x+=30){
+
+        const bh =
+            15 +
+            Math.random()*25;
+
+        ctx.fillRect(
+            x,
+            groundY-bh,
+            23,
+            bh
+        );
+
+    }
+
+
+    // road/grid perspective
+
+    ctx.strokeStyle = "rgba(80,170,220,.08)";
+    ctx.lineWidth = 1;
+
+    for(let y=H-100;y>0;y-=80){
+
+        ctx.beginPath();
+
+        ctx.moveTo(0,y);
+        ctx.lineTo(W,y);
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================
+   HELICOPTER
+========================= */
+
+function drawHelicopter(dt){
+
+    helicopter.rotor += dt * .025;
+
+    const x = helicopter.x;
+    const y = helicopter.y;
+
+    ctx.save();
+
+    // shadow/glow
+
+    const glow =
+        ctx.createRadialGradient(
+            x,y,5,
+            x,y,75
+        );
+
+    glow.addColorStop(
+        0,
+        "rgba(50,190,255,.16)"
+    );
+
+    glow.addColorStop(
+        1,
+        "rgba(0,0,0,0)"
+    );
+
+    ctx.fillStyle = glow;
+
+    ctx.beginPath();
+    ctx.arc(x,y,75,0,Math.PI*2);
+    ctx.fill();
+
+
+    // rotor
+
+    ctx.save();
+
+    ctx.translate(x,y-30);
+    ctx.rotate(helicopter.rotor);
+
+    ctx.strokeStyle =
+        "rgba(210,245,255,.8)";
+
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-48,0);
+    ctx.lineTo(48,0);
+
+    ctx.stroke();
+
+    ctx.restore();
+
+
+    // tail rotor
+
+    ctx.save();
+
+    ctx.translate(
+        x + 38,
+        y + 7
+    );
+
+    ctx.rotate(-helicopter.rotor*2);
+
+    ctx.strokeStyle =
+        "rgba(180,230,255,.7)";
+
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-13,0);
+    ctx.lineTo(13,0);
+
+    ctx.moveTo(0,-13);
+    ctx.lineTo(0,13);
+
+    ctx.stroke();
+
+    ctx.restore();
+
+
+    // tail
+
+    const tailGradient =
+        ctx.createLinearGradient(
+            x+5,y-8,
+            x+48,y+10
+        );
+
+    tailGradient.addColorStop(
+        0,
+        "#27485c"
+    );
+
+    tailGradient.addColorStop(
+        1,
+        "#10232f"
+    );
+
+    ctx.fillStyle = tailGradient;
+
+    ctx.beginPath();
+
+    ctx.moveTo(x+5,y-10);
+    ctx.lineTo(x+48,y-4);
+    ctx.lineTo(x+53,y+5);
+    ctx.lineTo(x+5,y+8);
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    // main body
+
+    const bodyGradient =
+        ctx.createLinearGradient(
+            x-40,y-22,
+            x+35,y+25
+        );
+
+    bodyGradient.addColorStop(
+        0,
+        "#42bde8"
+    );
+
+    bodyGradient.addColorStop(
+        .45,
+        "#176d9b"
+    );
+
+    bodyGradient.addColorStop(
+        1,
+        "#0b3048"
+    );
+
+    ctx.fillStyle = bodyGradient;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x,
+        y,
+        39,
+        23,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // cockpit
+
+    const glass =
+        ctx.createLinearGradient(
+            x-25,y-18,
+            x+20,y+10
+        );
+
+    glass.addColorStop(
+        0,
+        "#baf5ff"
+    );
+
+    glass.addColorStop(
+        .3,
+        "#318da9"
+    );
+
+    glass.addColorStop(
+        1,
+        "#071923"
+    );
+
+    ctx.fillStyle = glass;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x-14,
+        y-7,
+        23,
+        13,
+        -.15,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // cockpit reflection
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,.55)";
+
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x-28,
+        y-11
+    );
+
+    ctx.lineTo(
+        x-10,
+        y-17
+    );
+
+    ctx.stroke();
+
+
+    // weapon
+
+    ctx.fillStyle = "#111a22";
+
+    ctx.fillRect(
+        x-8,
+        y+16,
+        16,
+        12
+    );
+
+    ctx.fillRect(
+        x-4,
+        y+25,
+        8,
+        13
     );
 
 
-    obstacles = [];
+    // engine lights
+
+    ctx.fillStyle = "#55eaff";
+
+    ctx.shadowColor = "#55eaff";
+    ctx.shadowBlur = 15;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x-30,
+        y+7,
+        3,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
 }
 
 
-/* =====================================================
-   GAME OVER
-===================================================== */
+/* =========================
+   BULLETS
+========================= */
 
-function endGame() {
+function fire(){
 
-    gameRunning = false;
+    if(!running) return;
 
+    const count =
+        weaponLevel >= 4 ? 3 :
+        weaponLevel >= 2 ? 2 :
+        1;
 
-    leftPressed = false;
+    const spread =
+        count === 3 ? 18 :
+        count === 2 ? 11 :
+        0;
 
-    rightPressed = false;
+    for(let i=0;i<count;i++){
 
+        let offset = 0;
 
-    /*
-       TIMERNI TO'XTATISH
-    */
+        if(count === 2){
 
-    if (
-        obstacleTimer !== null
-    ) {
+            offset =
+                i === 0
+                ? -spread
+                : spread;
 
-        clearInterval(
-            obstacleTimer
+        }
+
+        if(count === 3){
+
+            offset =
+                i === 0 ? -spread :
+                i === 1 ? 0 :
+                spread;
+
+        }
+
+        bullets.push({
+
+            x:helicopter.x + offset,
+
+            y:helicopter.y - 37,
+
+            vx:offset * .025,
+
+            vy:-10,
+
+            width:5,
+
+            height:18,
+
+            life:0
+
+        });
+
+    }
+
+    helicopter.recoil = 4;
+
+    sound("shoot");
+}
+
+function updateBullets(dt){
+
+    for(let i=bullets.length-1;i>=0;i--){
+
+        const b = bullets[i];
+
+        b.x += b.vx * dt * .06;
+        b.y += b.vy * dt * .06;
+
+        b.life += dt;
+
+        if(b.y < -40 || b.life > 3000){
+
+            bullets.splice(i,1);
+
+        }
+
+    }
+
+}
+
+function drawBullets(){
+
+    for(const b of bullets){
+
+        ctx.save();
+
+        ctx.shadowColor = "#55eaff";
+        ctx.shadowBlur = 14;
+
+        const gradient =
+            ctx.createLinearGradient(
+                b.x,
+                b.y,
+                b.x,
+                b.y+b.height
+            );
+
+        gradient.addColorStop(
+            0,
+            "#ffffff"
         );
 
-        obstacleTimer = null;
-    }
-
-
-    finalScoreElement.textContent =
-        "Score: " + score;
-
-
-    gameOverScreen.style.display =
-        "block";
-}
-
-
-/* =====================================================
-   YANGI O'YIN
-===================================================== */
-
-function startGame() {
-
-    /*
-       TIMERNI TO'XTATISH
-    */
-
-    if (
-        obstacleTimer !== null
-    ) {
-
-        clearInterval(
-            obstacleTimer
+        gradient.addColorStop(
+            .4,
+            "#52eaff"
         );
 
-        obstacleTimer = null;
+        gradient.addColorStop(
+            1,
+            "#1675ff"
+        );
+
+        ctx.fillStyle = gradient;
+
+        ctx.fillRect(
+            b.x-b.width/2,
+            b.y,
+            b.width,
+            b.height
+        );
+
+        ctx.restore();
+
     }
 
-
-    /*
-       ESKI TO'SIQLARNI
-       TO'LIQ O'CHIRISH
-    */
-
-    removeAllObstacles();
-
-
-    /*
-       O'YINNI RESET
-    */
-
-    score = 0;
-
-    level = 1;
-
-    speed = 4;
-
-    ballPosition = 50;
-
-
-    scoreElement.textContent =
-        "0";
-
-
-    levelElement.textContent =
-        "1";
-
-
-    /*
-       GAME OVERNI YOPISH
-    */
-
-    gameOverScreen.style.display =
-        "none";
-
-
-    /*
-       O'YINNI YOQISH
-    */
-
-    gameRunning = true;
-
-
-    /*
-       BALLNI MARKAZGA QAYTARISH
-    */
-
-    updateBall();
-
-
-    /*
-       TO'SIQLARNI QAYTA BOSHLASH
-    */
-
-    startObstacleTimer();
 }
 
 
-/* =====================================================
-   PLAY AGAIN
-===================================================== */
+/* =========================
+   ENEMIES
+========================= */
 
-restartButton.addEventListener(
-    "click",
-    function() {
+function createEnemy(type){
 
-        startGame();
+    if(!running) return;
+
+    if(!type){
+
+        const r = Math.random();
+
+        if(level >= 5 && r < .12){
+
+            type = "boss";
+
+        }else if(r < .25){
+
+            type = "fast";
+
+        }else if(r < .48){
+
+            type = "armored";
+
+        }else{
+
+            type = "basic";
+
+        }
 
     }
-);
+
+    let enemy = {
+
+        x:60 + Math.random()*(W-120),
+
+        y:-100,
+
+        vx:0,
+
+        vy:enemySpeed,
+
+        type:type,
+
+        width:52,
+
+        height:48,
+
+        hp:1,
+
+        maxHp:1,
+
+        rotation:0
+
+    };
 
 
-/* =====================================================
-   EKRAN O'ZGARSA BALLNI
-   QAYTA JOYLASHTIRISH
-===================================================== */
+    if(type === "fast"){
 
-window.addEventListener(
-    "resize",
-    function() {
+        enemy.width = 46;
+        enemy.height = 40;
 
-        updateBall();
+        enemy.vy = enemySpeed * 1.55;
+
+        enemy.hp = 1;
 
     }
-);
 
 
-/* =====================================================
-   START
-===================================================== */
+    if(type === "armored"){
 
-updateBall();
+        enemy.width = 62;
+        enemy.height = 55;
 
-startGame();
+        enemy.vy = enemySpeed * .8;
 
-gameLoop();
+        enemy.hp = 3;
+        enemy.maxHp = 3;
 
-</script>
+    }
 
-</body>
-</html>
+
+    if(type === "boss"){
+
+        enemy.width = 110;
+        enemy.height = 82;
+
+        enemy.vy = enemySpeed * .45;
+
+        enemy.hp =
+            8 + level*2;
+
+        enemy.maxHp = enemy.hp;
+
+    }
+
+
+    enemies.push(enemy);
+
+}
+
+
+function drawEnemy(e){
+
+    ctx.save();
+
+    ctx.translate(e.x,e.y);
+
+    e.rotation += .002;
+
+    if(e.type === "basic"){
+
+        drawEnemyBasic();
+
+    }else if(e.type === "fast"){
+
+        drawEnemyFast();
+
+    }else if(e.type === "armored"){
+
+        drawEnemyArmored();
+
+    }else{
+
+        drawBoss(e);
+
+    }
+
+    ctx.restore();
+
+}
+
+
+function drawEnemyBasic(){
+
+    // wings
+
+    ctx.fillStyle = "#a52b39";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-45,5);
+    ctx.lineTo(-12,-6);
+    ctx.lineTo(-10,12);
+    ctx.lineTo(-43,20);
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(45,5);
+    ctx.lineTo(12,-6);
+    ctx.lineTo(10,12);
+    ctx.lineTo(43,20);
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    // body
+
+    const g =
+        ctx.createLinearGradient(
+            0,-25,
+            0,25
+        );
+
+    g.addColorStop(
+        0,
+        "#ff5968"
+    );
+
+    g.addColorStop(
+        1,
+        "#6e101b"
+    );
+
+    ctx.fillStyle = g;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        0,
+        20,
+        27,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // cockpit
+
+    ctx.fillStyle = "#182e45";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        -8,
+        12,
+        8,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // engine
+
+    ctx.fillStyle = "#ffbd3b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        27,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+
+
+function drawEnemyFast(){
+
+    ctx.fillStyle = "#b43cff";
+
+    ctx.beginPath();
+
+    ctx.moveTo(0,-27);
+    ctx.lineTo(27,22);
+    ctx.lineTo(0,13);
+    ctx.lineTo(-27,22);
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.fillStyle = "#e5c8ff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -3,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle = "#ffea4d";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        19,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+      
